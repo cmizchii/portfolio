@@ -344,7 +344,8 @@ div.logo {
 
 .hero-wrapper {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   gap: clamp(30px, 5vw, 80px);
 }
@@ -395,7 +396,7 @@ div.logo {
 /* RIGHT CONTENT */
 
 .hero-content {
-  max-width: clamp(350px, 45vw, 600px);
+  max-width: 100%;
   will-change: transform;
 }
 
@@ -1143,10 +1144,6 @@ div.logo {
 /* ================= RESPONSIVE ================= */
 
 @media (max-width: 1024px) {
-  .hero-wrapper {
-    gap: 40px;
-  }
-
   .about-wrapper {
     flex-direction: column;
     gap: 40px;
@@ -1185,15 +1182,6 @@ div.logo {
 
   .hero {
     padding: 30px 0 80px 0;
-  }
-
-  .hero-wrapper {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .hero-content {
-    max-width: 100%;
   }
 
   .hero-actions {
