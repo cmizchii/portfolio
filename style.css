@@ -222,7 +222,7 @@ div.logo {
 /* ================= HERO ================= */
 
 .hero {
-  padding: 20px 0 40px 0;
+  padding: 0 0 40px 0;
   position: relative;
   min-height: calc(100vh - 120px);
   display: flex;
@@ -350,7 +350,7 @@ div.logo {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: clamp(20px, 4vw, 60px);
+  gap: clamp(24px, 5vw, 70px);
 }
 
 /* IMAGE — parallax container */
