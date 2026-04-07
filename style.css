@@ -350,7 +350,7 @@ div.logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: clamp(20px, 4vw, 60px);
 }
 
 /* IMAGE — parallax container */
@@ -368,7 +368,7 @@ div.logo {
 
 /* Cat SVG */
 .hero-svg {
-  width: clamp(200px, 22vw, 300px);
+  width: clamp(220px, 28vw, 400px);
   max-width: 100%;
   height: auto;
 }
@@ -418,7 +418,7 @@ div.logo {
 
 .hero-content h2 {
   font-family: 'Unbounded', sans-serif;
-  font-size: clamp(1.6em, 3.2vw, 2.8em);
+  font-size: clamp(1.8em, 3.8vw, 3.4em);
   font-weight: 400;
   line-height: 1.15;
   margin-bottom: 30px;
@@ -437,7 +437,7 @@ div.logo {
 
 .hero-tags span {
   font-family: 'Unbounded', sans-serif;
-  font-size: clamp(11px, 1.2vw, 16px);
+  font-size: clamp(12px, 1.3vw, 17px);
   font-weight: 400;
   padding: 2px 12px;
   background: #2B2B2B;
