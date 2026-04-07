@@ -368,7 +368,7 @@ div.logo {
 
 /* Cat SVG */
 .hero-svg {
-  width: clamp(220px, 28vw, 400px);
+  width: clamp(187px, 23.8vw, 340px);
   max-width: 100%;
   height: auto;
 }
@@ -418,7 +418,7 @@ div.logo {
 
 .hero-content h2 {
   font-family: 'Unbounded', sans-serif;
-  font-size: clamp(1.8em, 3.8vw, 3.4em);
+  font-size: clamp(1.53em, 3.23vw, 2.89em);
   font-weight: 400;
   line-height: 1.15;
   margin-bottom: 30px;
@@ -437,7 +437,7 @@ div.logo {
 
 .hero-tags span {
   font-family: 'Unbounded', sans-serif;
-  font-size: clamp(12px, 1.3vw, 17px);
+  font-size: clamp(10px, 1.1vw, 14.5px);
   font-weight: 400;
   padding: 2px 12px;
   background: #2B2B2B;
