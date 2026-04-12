@@ -249,7 +249,7 @@ div.logo {
 
 .draw-toolbar {
   position: absolute;
-  bottom: calc(30px + 1em);
+  bottom: 30px;
   left: clamp(20px, 4vw, 52px);
   z-index: 11;
   display: flex;
