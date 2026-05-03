@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
-const ROW_1 = [
+const IMAGES = [
   'https://motionsites.ai/assets/hero-space-voyage-preview-eECLH3Yc.gif',
   'https://motionsites.ai/assets/hero-codenest-preview-Cgppc2qV.gif',
   'https://motionsites.ai/assets/hero-vex-ventures-preview-BczMFIiw.gif',
@@ -12,9 +12,6 @@ const ROW_1 = [
   'https://motionsites.ai/assets/hero-skyelite-preview-DHaZIgUv.gif',
   'https://motionsites.ai/assets/hero-aethera-preview-DknSlcTa.gif',
   'https://motionsites.ai/assets/hero-designpro-preview-D8c5_een.gif',
-];
-
-const ROW_2 = [
   'https://motionsites.ai/assets/hero-stellar-ai-preview-D3HL6bw1.gif',
   'https://motionsites.ai/assets/hero-xportfolio-preview-D4A8maiC.gif',
   'https://motionsites.ai/assets/hero-orbit-web3-preview-BXt4OttD.gif',
@@ -27,16 +24,27 @@ const ROW_2 = [
   'https://motionsites.ai/assets/hero-celestia-preview-0yO3jXO8.gif',
 ];
 
+const ROW_1 = IMAGES.slice(0, 11);
+const ROW_2 = IMAGES.slice(11);
+
 export default function MarqueeSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const [offset, setOffset] = useState(0);
+  const row1Ref = useRef<HTMLDivElement>(null);
+  const row2Ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => {
       if (!sectionRef.current) return;
-      const top = sectionRef.current.getBoundingClientRect().top + window.scrollY;
-      const value = (window.scrollY - top + window.innerHeight) * 0.3;
-      setOffset(value);
+      const rect = sectionRef.current.getBoundingClientRect();
+      const sectionTop = window.scrollY + rect.top;
+      const offset = (window.scrollY - sectionTop + window.innerHeight) * 0.3;
+
+      if (row1Ref.current) {
+        row1Ref.current.style.transform = `translateX(${offset - 200}px)`;
+      }
+      if (row2Ref.current) {
+        row2Ref.current.style.transform = `translateX(${-(offset - 200)}px)`;
+      }
     };
 
     onScroll();
@@ -44,30 +52,33 @@ export default function MarqueeSection() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const tripled1 = [...ROW_1, ...ROW_1, ...ROW_1];
-  const tripled2 = [...ROW_2, ...ROW_2, ...ROW_2];
-
   return (
     <section
       ref={sectionRef}
-      className="relative pt-24 sm:pt-32 md:pt-40 pb-10 overflow-hidden"
+      className="w-full overflow-hidden pt-24 sm:pt-32 md:pt-40 pb-10 bg-ink"
     >
       <div className="flex flex-col gap-3">
-        <div
-          className="marquee-row flex gap-3"
-          style={{ transform: `translateX(${offset - 200}px)` }}
-        >
-          {tripled1.map((src, i) => (
-            <Tile key={`r1-${i}`} src={src} />
-          ))}
+        <div className="overflow-hidden w-full">
+          <div
+            ref={row1Ref}
+            className="marquee-row flex gap-3"
+            style={{ transform: 'translateX(-200px)' }}
+          >
+            {[...ROW_1, ...ROW_1, ...ROW_1].map((src, i) => (
+              <Tile key={`r1-${i}`} src={src} />
+            ))}
+          </div>
         </div>
-        <div
-          className="marquee-row flex gap-3"
-          style={{ transform: `translateX(${-(offset - 200)}px)` }}
-        >
-          {tripled2.map((src, i) => (
-            <Tile key={`r2-${i}`} src={src} />
-          ))}
+        <div className="overflow-hidden w-full">
+          <div
+            ref={row2Ref}
+            className="marquee-row flex gap-3"
+            style={{ transform: 'translateX(200px)' }}
+          >
+            {[...ROW_2, ...ROW_2, ...ROW_2].map((src, i) => (
+              <Tile key={`r2-${i}`} src={src} />
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -76,12 +87,15 @@ export default function MarqueeSection() {
 
 function Tile({ src }: { src: string }) {
   return (
-    <div className="flex-shrink-0 w-[420px] h-[270px] overflow-hidden rounded-2xl bg-soft">
+    <div
+      className="flex-shrink-0 rounded-2xl overflow-hidden"
+      style={{ width: '420px', height: '270px' }}
+    >
       <img
         src={src}
         alt=""
-        loading="lazy"
         className="w-full h-full object-cover"
+        loading="lazy"
       />
     </div>
   );

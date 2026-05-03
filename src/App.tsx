@@ -21,7 +21,7 @@ export default function App() {
       <CustomCursor />
       <Header />
 
-      <main className="relative">
+      <main className="relative bg-ink" style={{ overflowX: 'clip' }}>
         <HeroSection onOpenInquiry={() => setInquiryOpen(true)} />
         <MarqueeSection />
         <AboutSection onOpenInquiry={() => setInquiryOpen(true)} />

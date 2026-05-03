@@ -4,17 +4,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: '#2B2B2B',
+        ink: '#0C0C0C',
         canvas: '#FFFFFF',
-        coral: '#C9735B',
-        ash: '#D9D9D9',
-        muted: '#999999',
+        mist: '#D7E2EA',
+        steel: '#646973',
+        chrome: '#BBCCD7',
+        magenta: '#B600A8',
+        violet: '#7621B0',
+        ember: '#BE4C00',
         soft: '#F5F5F5',
+        muted: 'rgba(215, 226, 234, 0.6)',
       },
       fontFamily: {
-        display: ['Unbounded', 'sans-serif'],
-        body: ['Geist', 'sans-serif'],
-        serif: ['"DM Serif Display"', 'serif'],
+        display: ['Kanit', 'sans-serif'],
+        body: ['Kanit', 'sans-serif'],
       },
     },
   },

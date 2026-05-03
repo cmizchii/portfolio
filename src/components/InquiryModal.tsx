@@ -78,10 +78,7 @@ export default function InquiryModal({ open, onClose }: Props) {
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  const progressFill = (() => {
-    if (step === 'done') return 100;
-    return (step / 4) * 100;
-  })();
+  const progressFill = step === 'done' ? 100 : (step / 4) * 100;
 
   const select = (key: keyof Selections, value: string) => {
     setSel((prev) => ({ ...prev, [key]: value }));
@@ -89,8 +86,7 @@ export default function InquiryModal({ open, onClose }: Props) {
 
   const next = () => {
     if (step === 1 || step === 2 || step === 3) {
-      const nextStep = (step + 1) as 2 | 3 | 4;
-      setStep(nextStep);
+      setStep((step + 1) as 2 | 3 | 4);
     }
   };
 
@@ -118,14 +114,14 @@ export default function InquiryModal({ open, onClose }: Props) {
         open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       }`}
       style={{
-        background: 'rgba(0,0,0,0.3)',
+        background: 'rgba(0,0,0,0.6)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
       }}
       onClick={onClose}
     >
       <div
-        className={`relative w-[90%] max-w-[500px] bg-white/95 border border-black/[0.06] rounded-[20px] p-9 sm:p-11 shadow-[0_24px_80px_rgba(0,0,0,0.12),0_2px_12px_rgba(0,0,0,0.04)] transition-transform duration-500 ${
+        className={`relative w-[90%] max-w-[500px] bg-ink/95 border border-mist/15 rounded-[20px] p-9 sm:p-11 shadow-[0_24px_80px_rgba(0,0,0,0.6),0_2px_12px_rgba(0,0,0,0.3)] transition-transform duration-500 ${
           open ? 'translate-y-0 scale-100' : 'translate-y-5 scale-95'
         }`}
         style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
@@ -133,7 +129,7 @@ export default function InquiryModal({ open, onClose }: Props) {
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-5 w-[30px] h-[30px] bg-black/5 hover:bg-black/10 rounded-full flex items-center justify-center text-[18px] text-muted hover:text-ink transition-colors"
+          className="absolute top-4 right-5 w-[30px] h-[30px] bg-mist/10 hover:bg-mist/20 rounded-full flex items-center justify-center text-[18px] text-mist/70 hover:text-mist transition-colors"
           aria-label="close"
         >
           ×
@@ -142,10 +138,10 @@ export default function InquiryModal({ open, onClose }: Props) {
         {STEPS.map(({ step: s, label, question, key, options }) =>
           step === s ? (
             <div key={s}>
-              <p className="font-body text-[11px] uppercase tracking-[0.2em] text-muted mb-3">
+              <p className="font-display text-[11px] uppercase tracking-[0.2em] text-mist/50 mb-3">
                 {label}
               </p>
-              <h3 className="font-display text-[18px] font-medium text-ink mb-7 leading-snug">
+              <h3 className="font-display text-[18px] font-medium text-mist mb-7 leading-snug">
                 {question}
               </h3>
               <div className="flex flex-col gap-2.5">
@@ -153,10 +149,10 @@ export default function InquiryModal({ open, onClose }: Props) {
                   <button
                     key={opt.value}
                     onClick={() => select(key, opt.value)}
-                    className={`text-left font-body text-[14px] rounded-[12px] py-3.5 px-4 border-[1.5px] transition-all duration-200 ${
+                    className={`text-left font-display text-[14px] rounded-[12px] py-3.5 px-4 border-[1.5px] transition-all duration-200 ${
                       sel[key] === opt.value
-                        ? 'bg-ink text-white border-ink'
-                        : 'bg-black/[0.03] hover:bg-black/[0.06] text-ink border-transparent'
+                        ? 'bg-mist text-ink border-mist'
+                        : 'bg-mist/5 hover:bg-mist/10 text-mist border-transparent'
                     }`}
                   >
                     {opt.label}
@@ -169,10 +165,10 @@ export default function InquiryModal({ open, onClose }: Props) {
 
         {step === 4 && (
           <div>
-            <p className="font-body text-[11px] uppercase tracking-[0.2em] text-muted mb-3">
+            <p className="font-display text-[11px] uppercase tracking-[0.2em] text-mist/50 mb-3">
               04 / 04
             </p>
-            <h3 className="font-display text-[18px] font-medium text-ink mb-7 leading-snug">
+            <h3 className="font-display text-[18px] font-medium text-mist mb-7 leading-snug">
               Almost there — how can I reach you?
             </h3>
             <form onSubmit={submit} className="flex flex-col gap-3.5">
@@ -181,24 +177,24 @@ export default function InquiryModal({ open, onClose }: Props) {
                 type="text"
                 name="name"
                 placeholder="Your name"
-                className="font-body text-[14px] rounded-[12px] py-3.5 px-4 bg-black/[0.03] border-[1.5px] border-transparent focus:border-black/10 focus:bg-black/[0.05] outline-none transition-all"
+                className="font-display text-[14px] text-mist rounded-[12px] py-3.5 px-4 bg-mist/5 border-[1.5px] border-transparent focus:border-mist/30 focus:bg-mist/10 outline-none transition-all placeholder:text-mist/40"
               />
               <input
                 required
                 type="email"
                 name="email"
                 placeholder="Email address"
-                className="font-body text-[14px] rounded-[12px] py-3.5 px-4 bg-black/[0.03] border-[1.5px] border-transparent focus:border-black/10 focus:bg-black/[0.05] outline-none transition-all"
+                className="font-display text-[14px] text-mist rounded-[12px] py-3.5 px-4 bg-mist/5 border-[1.5px] border-transparent focus:border-mist/30 focus:bg-mist/10 outline-none transition-all placeholder:text-mist/40"
               />
               <textarea
                 name="details"
                 rows={3}
                 placeholder="Brief description of your project (optional)"
-                className="font-body text-[14px] rounded-[12px] py-3.5 px-4 bg-black/[0.03] border-[1.5px] border-transparent focus:border-black/10 focus:bg-black/[0.05] outline-none transition-all resize-none"
+                className="font-display text-[14px] text-mist rounded-[12px] py-3.5 px-4 bg-mist/5 border-[1.5px] border-transparent focus:border-mist/30 focus:bg-mist/10 outline-none transition-all resize-none placeholder:text-mist/40"
               />
               <button
                 type="submit"
-                className="font-display text-[13px] font-medium tracking-[0.05em] bg-ink hover:bg-coral text-white rounded-[12px] py-4 mt-1 transition-all hover:scale-[1.01]"
+                className="contact-pill font-display text-[13px] font-medium tracking-widest uppercase text-white rounded-[12px] py-4 mt-1 transition-all hover:opacity-90"
               >
                 Send Inquiry
               </button>
@@ -208,10 +204,10 @@ export default function InquiryModal({ open, onClose }: Props) {
 
         {step === 'done' && (
           <div className="text-center py-6">
-            <h3 className="font-display text-[20px] font-medium text-ink mb-3">
+            <h3 className="font-display text-[20px] font-medium text-mist mb-3">
               Thank you!
             </h3>
-            <p className="font-body text-[14px] text-muted leading-relaxed">
+            <p className="font-display text-[14px] text-mist/60 leading-relaxed">
               I&rsquo;ll review your inquiry and get back to you within 24–48 hours.
             </p>
           </div>
@@ -222,28 +218,28 @@ export default function InquiryModal({ open, onClose }: Props) {
             <button
               onClick={back}
               disabled={step === 1}
-              className="font-body text-[13px] bg-black/[0.04] disabled:opacity-25 hover:enabled:bg-black/[0.08] rounded-[10px] py-2.5 px-5 transition-colors"
+              className="font-display text-[13px] text-mist bg-mist/5 disabled:opacity-25 hover:enabled:bg-mist/10 rounded-[10px] py-2.5 px-5 transition-colors"
             >
               Back
             </button>
-            <div className="flex-1 h-[3px] bg-black/[0.06] rounded overflow-hidden">
+            <div className="flex-1 h-[3px] bg-mist/10 rounded overflow-hidden">
               <div
-                className="h-full bg-ink rounded transition-all duration-500"
-                style={{ width: `${progressFill}%` }}
+                className="h-full rounded transition-all duration-500"
+                style={{ width: `${progressFill}%`, background: 'linear-gradient(90deg, #B600A8, #7621B0, #BE4C00)' }}
               />
             </div>
             <button
               onClick={next}
-              disabled={step !== 4 ? !currentSelected : true}
-              className="font-body text-[13px] bg-black/[0.04] disabled:opacity-25 hover:enabled:bg-black/[0.08] rounded-[10px] py-2.5 px-5 transition-colors"
+              disabled={step === 4 || !currentSelected}
+              className="font-display text-[13px] text-mist bg-mist/5 disabled:opacity-25 hover:enabled:bg-mist/10 rounded-[10px] py-2.5 px-5 transition-colors"
             >
               {step === 4 ? '—' : 'Next'}
             </button>
           </div>
         )}
 
-        <div className="mt-7 p-4 bg-black/[0.025] rounded-[12px]">
-          <p className="font-body text-[11px] text-muted leading-relaxed">
+        <div className="mt-7 p-4 bg-mist/5 rounded-[12px]">
+          <p className="font-display text-[11px] text-mist/40 leading-relaxed">
             Pricing depends on project scope &amp; complexity. UI/UX, front-end (HTML/CSS/JS, Webflow), website redesigns, branding, and UX audits.
           </p>
         </div>

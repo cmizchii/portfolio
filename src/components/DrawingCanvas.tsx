@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 
-const STORAGE_KEY = 'shaimaa-portfolio-drawing-v1';
+const STORAGE_KEY = 'shaimaa-portfolio-drawing-v2';
 const TTL_MS = 5 * 60 * 60 * 1000;
 
 type Stroke = { color: string; points: { x: number; y: number }[] };
 type Saved = { strokes: Stroke[]; expires: number; w: number; h: number };
 
-const COLORS = ['#2B2B2B', '#C9735B', '#89CFF0', '#FFB6C1'];
+const COLORS = ['#D7E2EA', '#B600A8', '#BE4C00', '#7621B0'];
 
 export default function DrawingCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -135,13 +135,13 @@ export default function DrawingCanvas() {
         onPointerCancel={onPointerUp}
         onPointerLeave={onPointerUp}
       />
-      <div className="absolute bottom-7 left-5 sm:left-8 md:left-10 z-20 flex items-center gap-2 bg-canvas border border-ink/10 rounded-full px-4 py-2 shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+      <div className="absolute bottom-7 left-5 sm:left-8 md:left-10 z-20 flex items-center gap-2 bg-ink/80 backdrop-blur border border-mist/15 rounded-full px-4 py-2 shadow-[0_2px_12px_rgba(0,0,0,0.4)]">
         {COLORS.map((c) => (
           <button
             key={c}
             onClick={() => setColor(c)}
             className={`w-[22px] h-[22px] rounded-full transition-transform duration-200 hover:scale-110 ${
-              color === c ? 'ring-2 ring-ink/40 scale-110' : ''
+              color === c ? 'ring-2 ring-mist/60 scale-110' : ''
             }`}
             style={{ background: c }}
             aria-label={`color ${c}`}
@@ -149,7 +149,7 @@ export default function DrawingCanvas() {
         ))}
         <button
           onClick={undo}
-          className="font-body text-[13px] text-muted hover:text-ink px-2 py-1 transition-colors"
+          className="font-display text-[13px] text-mist/60 hover:text-mist px-2 py-1 transition-colors"
         >
           undo
         </button>
@@ -158,11 +158,11 @@ export default function DrawingCanvas() {
           onMouseEnter={() => setShowInfo(true)}
           onMouseLeave={() => setShowInfo(false)}
         >
-          <span className="w-5 h-5 rounded-full border border-ink/20 flex items-center justify-center font-serif italic text-[12px] text-muted hover:text-ink hover:border-ink transition-colors">
+          <span className="w-5 h-5 rounded-full border border-mist/30 flex items-center justify-center font-display italic text-[12px] text-mist/60 hover:text-mist hover:border-mist transition-colors">
             i
           </span>
           {showInfo && (
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-[220px] bg-ink text-white font-body text-[12px] leading-[1.5] p-3 rounded-[10px] z-30">
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-[220px] bg-mist text-ink font-display text-[12px] leading-[1.5] p-3 rounded-[10px] z-30">
               sketch something — your drawing stays for 5 hours, even after you leave. the next visitor will see what you drew.
             </div>
           )}
