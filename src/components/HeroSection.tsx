@@ -17,7 +17,7 @@ export default function HeroSection({ onOpenInquiry }: HeroSectionProps) {
 
       <div className="px-5 sm:px-8 md:px-10 overflow-hidden shrink-0">
         <FadeIn delay={0.15} y={40}>
-          <h1 className="hero-heading uppercase whitespace-nowrap w-full text-[11vw] sm:text-[12vw] md:text-[13vw] lg:text-[14vw]">
+          <h1 className="hero-heading uppercase whitespace-nowrap w-full text-[14vw] sm:text-[15vw] md:text-[16vw] lg:text-[17.5vw]">
             Hi, I&apos;m Shim
           </h1>
         </FadeIn>
@@ -32,7 +32,7 @@ export default function HeroSection({ onOpenInquiry }: HeroSectionProps) {
           className="flex items-center justify-center max-h-full"
         >
           <FadeIn delay={0.6} y={30} className="max-h-full flex items-center justify-center">
-            <HeroSVG className="h-auto w-auto max-h-[min(46vh,500px)] max-w-[min(38vw,500px)]" />
+            <HeroSVG className="h-auto w-auto max-h-[min(40vh,460px)] max-w-[min(34vw,460px)]" />
           </FadeIn>
         </Magnet>
       </div>
