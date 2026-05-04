@@ -15,7 +15,7 @@ export default function HeroSection({ onOpenInquiry }: HeroSectionProps) {
     >
       <div className="h-[64px] sm:h-[72px] md:h-[88px] shrink-0" />
 
-      <div className="px-5 sm:px-8 md:px-10 overflow-hidden shrink-0">
+      <div className="px-5 sm:px-8 md:px-10 overflow-hidden shrink-0 relative z-20">
         <FadeIn delay={0.15} y={40}>
           <h1 className="hero-heading uppercase w-full flex justify-between items-baseline whitespace-nowrap text-[14vw] sm:text-[15vw] md:text-[16vw] lg:text-[17.5vw]">
             <span>HI,</span>
@@ -25,19 +25,7 @@ export default function HeroSection({ onOpenInquiry }: HeroSectionProps) {
         </FadeIn>
       </div>
 
-      <div className="flex-1 flex items-center justify-center min-h-0 px-5 py-2">
-        <Magnet
-          padding={150}
-          strength={5}
-          activeTransition="transform 0.3s ease-out"
-          inactiveTransition="transform 0.6s ease-in-out"
-          className="flex items-center justify-center max-h-full"
-        >
-          <FadeIn delay={0.6} y={30} className="max-h-full flex items-center justify-center">
-            <HeroSVG className="h-auto w-auto max-h-[min(40vh,460px)] max-w-[min(34vw,460px)]" />
-          </FadeIn>
-        </Magnet>
-      </div>
+      <div className="flex-1" />
 
       <div className="px-5 sm:px-8 md:px-10 pb-5 sm:pb-6 md:pb-8 flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 sm:gap-6 relative z-20 shrink-0">
         <FadeIn delay={0.35} y={20}>
@@ -53,6 +41,18 @@ export default function HeroSection({ onOpenInquiry }: HeroSectionProps) {
           <ContactButton onClick={onOpenInquiry} label="Contact Me" />
         </FadeIn>
       </div>
+
+      <Magnet
+        padding={150}
+        strength={5}
+        activeTransition="transform 0.3s ease-out"
+        inactiveTransition="transform 0.6s ease-in-out"
+        className="absolute left-1/2 -translate-x-1/2 bottom-[80px] sm:bottom-[96px] md:bottom-[112px] z-10 pointer-events-none"
+      >
+        <FadeIn delay={0.6} y={30}>
+          <HeroSVG className="h-[min(72vh,820px)] w-auto" />
+        </FadeIn>
+      </Magnet>
     </section>
   );
 }
