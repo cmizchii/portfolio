@@ -17,8 +17,10 @@ export default function HeroSection({ onOpenInquiry }: HeroSectionProps) {
 
       <div className="px-5 sm:px-8 md:px-10 overflow-hidden shrink-0">
         <FadeIn delay={0.15} y={40}>
-          <h1 className="hero-heading uppercase whitespace-nowrap w-full text-[14vw] sm:text-[15vw] md:text-[16vw] lg:text-[17.5vw]">
-            Hi, I&apos;m Shim
+          <h1 className="hero-heading uppercase w-full flex justify-between items-baseline whitespace-nowrap text-[14vw] sm:text-[15vw] md:text-[16vw] lg:text-[17.5vw]">
+            <span>HI,</span>
+            <span>I&apos;M</span>
+            <span>SHIM</span>
           </h1>
         </FadeIn>
       </div>
