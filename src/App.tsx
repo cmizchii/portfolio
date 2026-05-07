@@ -1118,7 +1118,7 @@ function AboutContent({ progress }: { progress: number }) {
               {wordIndex === 1 ? (
                 <span
                   ref={videoWrapRef}
-                  className="inline-flex h-[2.11em] w-[0.99em] translate-y-[0.06em] items-center justify-center overflow-hidden"
+                  className="inline-flex h-[2.55em] w-[1.2em] translate-y-[0.06em] items-center justify-center overflow-hidden"
                   style={{
                     opacity: videoRevealProgress,
                     filter: `blur(${lerp(12, 0, videoRevealProgress)}px)`,
@@ -1129,7 +1129,7 @@ function AboutContent({ progress }: { progress: number }) {
                   <video
                     ref={videoRef}
                     src={shimMemojiVideo}
-                    className="h-[233%] w-[252%] -translate-x-[2.5%] translate-y-[0%] object-contain"
+                    className="h-[282%] w-[305%] -translate-x-[2.5%] -translate-y-[1%] object-contain"
                     muted
                     playsInline
                     preload="auto"
