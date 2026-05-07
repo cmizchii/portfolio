@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import shimMemojiVideo from '../images/memoji.mov';
 
 type Tag = { text: string; color: string; top: string; left: string };
 type Viewport = { width: number; height: number };
@@ -87,8 +88,11 @@ const CURSOR_TRAIL_DISTANCE = 34;
 const CURSOR_TRAIL_INTERVAL = 70;
 const CURSOR_TRAIL_LIFETIME = 920;
 const CURSOR_TRAIL_LIMIT = 16;
-const ABOUT_PHRASE = 'I WANNA BE WHERE THE PEOPLE ARE';
-const ABOUT_WORD_REVEAL_STARTS = [0.08, 0.13, 0.25, 0.36, 0.49, 0.6, 0.7];
+const ABOUT_TEXT_PARTS = ['im', 'shim', 'a', 'designer', 'who', 'also', 'codes'];
+const ABOUT_TEXT_REVEAL_STARTS = [0.08, 0.14, 0.3, 0.38, 0.48, 0.57, 0.66];
+const ABOUT_VIDEO_REVEAL_START = 0.22;
+const ABOUT_VIDEO_SCROLL_START = 0.02;
+const ABOUT_VIDEO_SCROLL_END = 0.92;
 const projectMotionProfiles: ProjectMotion[] = [
   {
     riseStart: 0.02,
@@ -982,50 +986,160 @@ function ProjectsSection() {
 }
 
 function AboutContent({ progress }: { progress: number }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoWrapRef = useRef<HTMLSpanElement>(null);
+  const videoFrameRef = useRef(0);
+  const videoTargetTimeRef = useRef(0);
+  const [isVideoVisible, setIsVideoVisible] = useState(false);
   const horizontalProgress = progressBetween(progress, 0, 0.92);
   const verticalProgress = easeInOut(progressBetween(progress, 0.2, 0.94));
   const detailsProgress = easeOut(progressBetween(progress, 0.66, 0.88));
-  const words = ABOUT_PHRASE.split(' ');
+  const videoRevealProgress = easeOut(
+    progressBetween(horizontalProgress, ABOUT_VIDEO_REVEAL_START, ABOUT_VIDEO_REVEAL_START + 0.16),
+  );
+  const videoScrollProgress = easeInOut(
+    progressBetween(horizontalProgress, ABOUT_VIDEO_SCROLL_START, ABOUT_VIDEO_SCROLL_END),
+  );
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const videoWrap = videoWrapRef.current;
+    if (!video || !videoWrap) return;
+
+    video.pause();
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVideoVisible(Boolean(entry?.isIntersecting));
+      },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.02 },
+    );
+
+    observer.observe(videoWrap);
+
+    return () => {
+      observer.disconnect();
+      video.pause();
+    };
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const setTargetTime = () => {
+      const duration = Number.isFinite(video.duration) ? video.duration : 0;
+      if (!duration) return false;
+
+      videoTargetTimeRef.current = duration * videoScrollProgress;
+      return true;
+    };
+
+    const smoothToTarget = () => {
+      videoFrameRef.current = 0;
+      video.pause();
+
+      if (!isVideoVisible) return;
+
+      const targetTime = videoTargetTimeRef.current;
+      const delta = targetTime - video.currentTime;
+
+      if (Math.abs(delta) < 0.018) {
+        video.currentTime = targetTime;
+        return;
+      }
+
+      video.currentTime += delta * 0.18;
+      videoFrameRef.current = requestAnimationFrame(smoothToTarget);
+    };
+
+    const requestSmooth = () => {
+      cancelAnimationFrame(videoFrameRef.current);
+
+      if (isVideoVisible && setTargetTime()) {
+        videoFrameRef.current = requestAnimationFrame(smoothToTarget);
+      } else {
+        video.pause();
+      }
+    };
+
+    requestSmooth();
+    video.addEventListener('loadedmetadata', requestSmooth);
+
+    return () => {
+      video.removeEventListener('loadedmetadata', requestSmooth);
+      cancelAnimationFrame(videoFrameRef.current);
+    };
+  }, [isVideoVisible, videoScrollProgress]);
 
   return (
     <div className="pointer-events-none absolute inset-0 z-50 px-5" aria-label="About">
       <div
-        className="absolute left-1/2 top-1/2 flex -translate-y-1/2 items-center whitespace-nowrap text-[clamp(52px,8.2vw,132px)] font-black uppercase leading-none tracking-[0]"
+        className="absolute left-1/2 top-1/2 flex -translate-y-1/2 items-center gap-[0.22em] whitespace-nowrap text-[clamp(48px,7.4vw,120px)] font-black leading-none tracking-[0]"
+        aria-label="im shim, a designer who also codes"
         style={{
           fontFamily: "Inter, system-ui, sans-serif",
           transform: `translate3d(calc(-50% + ${lerp(142, -78, horizontalProgress)}vw), calc(-50% - ${lerp(0, 35, verticalProgress)}vh), 0) rotate(${lerp(-1.8, 0.8, horizontalProgress)}deg)`,
           willChange: 'transform',
         }}
       >
-        {words.map((word, wordIndex) => (
-          <span key={`${word}-${wordIndex}`} className="inline-flex pr-[0.24em]" aria-hidden="true">
-            {Array.from(word).map((letter, letterIndex) => {
-              const revealStart =
-                (ABOUT_WORD_REVEAL_STARTS[wordIndex] ?? 0.72) + letterIndex * 0.018;
-              const letterProgress = easeOut(
-                progressBetween(horizontalProgress, revealStart, revealStart + 0.14),
-              );
-              const fromTop = (wordIndex + letterIndex) % 2 === 0;
-              const yStart = fromTop ? -135 : 135;
-              const rotateStart = fromTop ? -8 : 8;
+        {ABOUT_TEXT_PARTS.map((word, wordIndex) => {
+          const wordRevealStart = ABOUT_TEXT_REVEAL_STARTS[wordIndex] ?? 0.72;
 
-              return (
+          return (
+            <span key={`${word}-${wordIndex}`} className="inline-flex items-center gap-[0.22em]" aria-hidden="true">
+              <span className="inline-flex">
+                {Array.from(word).map((letter, letterIndex) => {
+                  const letterRevealStart = wordRevealStart + letterIndex * 0.018;
+                  const letterProgress = easeOut(
+                    progressBetween(horizontalProgress, letterRevealStart, letterRevealStart + 0.14),
+                  );
+                  const fromTop = (wordIndex + letterIndex) % 2 === 0;
+                  const yStart = fromTop ? -135 : 135;
+                  const rotateStart = fromTop ? -8 : 8;
+
+                  return (
+                    <span
+                      key={`${word}-${letter}-${letterIndex}`}
+                      className="inline-block"
+                      style={{
+                        opacity: letterProgress,
+                        filter: `blur(${lerp(10, 0, letterProgress)}px)`,
+                        transform: `translate3d(0, ${lerp(yStart, 0, letterProgress)}%, 0) rotate(${lerp(rotateStart, 0, letterProgress)}deg)`,
+                        willChange: 'opacity, filter, transform',
+                      }}
+                    >
+                      {letter}
+                    </span>
+                  );
+                })}
+              </span>
+
+              {wordIndex === 1 ? (
                 <span
-                  key={`${word}-${letter}-${letterIndex}`}
-                  className="inline-block"
+                  ref={videoWrapRef}
+                  className="inline-flex h-[2.11em] w-[0.99em] translate-y-[0.06em] items-center justify-center overflow-hidden"
                   style={{
-                    opacity: letterProgress,
-                    filter: `blur(${lerp(10, 0, letterProgress)}px)`,
-                    transform: `translate3d(0, ${lerp(yStart, 0, letterProgress)}%, 0) rotate(${lerp(rotateStart, 0, letterProgress)}deg)`,
+                    opacity: videoRevealProgress,
+                    filter: `blur(${lerp(12, 0, videoRevealProgress)}px)`,
+                    transform: `translate3d(0, ${lerp(72, 0, videoRevealProgress)}%, 0) scale(${lerp(0.76, 1, videoRevealProgress)})`,
                     willChange: 'opacity, filter, transform',
                   }}
-                >
-                  {letter}
+                  >
+                  <video
+                    ref={videoRef}
+                    src={shimMemojiVideo}
+                    className="h-[233%] w-[252%] -translate-x-[2.5%] translate-y-[0%] object-contain"
+                    muted
+                    playsInline
+                    preload="auto"
+                    aria-hidden="true"
+                  />
                 </span>
-              );
-            })}
-          </span>
-        ))}
+              ) : null}
+            </span>
+          );
+        })}
       </div>
 
       <div
