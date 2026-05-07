@@ -44,7 +44,7 @@ const TEXT_PAD_T = 20;
 const LINE_COLOR = '#2a2a2a';
 const BUMP_RADIUS = 130;
 const BUMP_STRENGTH = 32;
-const SCROLL_DISTANCE_VH = 288;
+const SCROLL_DISTANCE_VH = 271;
 const SCROLL_SMOOTHING = 0.14;
 const SCROLL_SETTLE_THRESHOLD = 0.0005;
 const CARD_START = 0.08;
@@ -69,6 +69,15 @@ const CURSOR_TRAIL_DISTANCE = 34;
 const CURSOR_TRAIL_INTERVAL = 70;
 const CURSOR_TRAIL_LIFETIME = 920;
 const CURSOR_TRAIL_LIMIT = 16;
+const PROJECT_EXIT_START = 0.76;
+const PROJECT_EXIT_END = 1;
+const ABOUT_PHRASE = 'I WANNA BE WHERE THE PEOPLE ARE';
+const ABOUT_WORD_REVEAL_STARTS = [0.08, 0.13, 0.25, 0.36, 0.49, 0.6, 0.7];
+const aboutDetails = [
+  'I build interfaces around how people actually move.',
+  'Research, structure, visual polish, and front-end thinking stay connected from the first idea to the final interaction.',
+  'The goal is simple: make the next step feel clear, human, and intentional.',
+];
 
 const projects: Project[] = [
   {
@@ -647,23 +656,36 @@ function SecondScreen({ progress }: { progress: number }) {
 }
 
 function ProjectsSection() {
-  const [progress, setProgress] = useState(0);
+  const [projectProgress, setProjectProgress] = useState(0);
+  const [aboutProgress, setAboutProgress] = useState(0);
   const [activeProject, setActiveProject] = useState<string | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
+  const projectStageRef = useRef<HTMLDivElement>(null);
+  const aboutStageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let frame = 0;
 
+    const getStageProgress = (stage: HTMLElement | null) => {
+      if (!stage) return 0;
+
+      const stageTop = stage.getBoundingClientRect().top + window.scrollY;
+      const scrollRange = Math.max(1, stage.offsetHeight - window.innerHeight);
+
+      return clamp((window.scrollY - stageTop) / scrollRange);
+    };
+
     const update = () => {
       frame = 0;
-      const section = sectionRef.current;
-      if (!section) return;
+      const nextProjectProgress = getStageProgress(projectStageRef.current);
+      const nextAboutProgress = getStageProgress(aboutStageRef.current);
 
-      const sectionTop = section.getBoundingClientRect().top + window.scrollY;
-      const scrollRange = Math.max(1, section.offsetHeight - window.innerHeight);
-      const nextProgress = clamp((window.scrollY - sectionTop) / scrollRange);
-
-      setProgress((current) => (Math.abs(current - nextProgress) > 0.001 ? nextProgress : current));
+      setProjectProgress((current) =>
+        Math.abs(current - nextProjectProgress) > 0.001 ? nextProjectProgress : current,
+      );
+      setAboutProgress((current) =>
+        Math.abs(current - nextAboutProgress) > 0.001 ? nextAboutProgress : current,
+      );
     };
 
     const requestUpdate = () => {
@@ -682,7 +704,11 @@ function ProjectsSection() {
     };
   }, []);
 
-  const sceneProgress = lerp(0.28, 1, easeOut(progressBetween(progress, 0, 0.14)));
+  const sceneRevealProgress = easeInOut(progressBetween(projectProgress, 0.05, 0.24));
+  const sceneProgress = lerp(0.34, 1, easeInOut(progressBetween(projectProgress, 0, 0.13)));
+  const sceneExitProgress = easeInOut(progressBetween(projectProgress, PROJECT_EXIT_START, PROJECT_EXIT_END));
+  const sceneBlur = lerp(18, 0, sceneRevealProgress);
+  const sceneLift = lerp(18, 0, sceneRevealProgress) - lerp(0, 30, sceneExitProgress);
   const introFocusBlur = activeProject ? 4 : 0;
   const introOpacity = activeProject ? 0.72 : 1;
   const activeIndex = activeProject ? projects.findIndex((project) => project.id === activeProject) : -1;
@@ -713,69 +739,158 @@ function ProjectsSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-[220vh] bg-white text-black"
-      aria-label="Selected projects"
+      className="relative bg-white text-black"
+      aria-label="Selected projects and about"
     >
-      <div
-        className="sticky top-0 h-screen overflow-hidden"
-        onMouseMove={(event) => updateActiveProject(event.clientX, event.clientY)}
-        onMouseLeave={() => setActiveProject(null)}
-      >
+      <div ref={projectStageRef} className="relative h-[360vh]">
         <div
-          className="absolute inset-0"
-          style={{
-            opacity: sceneProgress,
-            transform: `translateY(${lerp(18, 0, sceneProgress)}vh)`,
-            willChange: 'opacity, transform',
-          }}
+          className="sticky top-0 h-screen overflow-hidden"
+          onMouseMove={(event) => updateActiveProject(event.clientX, event.clientY)}
+          onMouseLeave={() => setActiveProject(null)}
         >
           <div
-            className="pointer-events-none absolute left-1/2 top-1/2 z-40 w-[min(86vw,560px)] -translate-x-1/2 -translate-y-1/2 text-center"
+            className="absolute inset-0"
             style={{
-              opacity: introOpacity,
-              filter: `blur(${introFocusBlur}px)`,
-              transition: 'filter 260ms ease, opacity 260ms ease',
+              opacity: sceneProgress,
+              filter: `blur(${sceneBlur}px)`,
+              transform: `translateY(${sceneLift}vh)`,
+              willChange: 'opacity, filter, transform',
             }}
           >
-            <h2
-              className="text-[clamp(48px,7vw,82px)] font-medium leading-none tracking-[0]"
-              style={{ fontFamily: "'Instrument Sans', Inter, system-ui, sans-serif" }}
+            <div
+              className="pointer-events-none absolute left-1/2 top-1/2 z-40 w-[min(86vw,560px)] -translate-x-1/2 -translate-y-1/2 text-center"
+              style={{
+                opacity: introOpacity,
+                filter: `blur(${introFocusBlur}px)`,
+                transition: 'filter 260ms ease, opacity 260ms ease',
+              }}
             >
-              MY WORK
-            </h2>
-            <p className="mx-auto mt-8 max-w-[390px] text-[18px] leading-[1.35] text-[#626262]">
-              From research to final pixel, every project here is a full design process, not just a
-              pretty screen.
-            </p>
-          </div>
+              <h2
+                className="text-[clamp(48px,7vw,82px)] font-medium leading-none tracking-[0]"
+                style={{ fontFamily: "'Instrument Sans', Inter, system-ui, sans-serif" }}
+              >
+                MY WORK
+              </h2>
+              <p className="mx-auto mt-8 max-w-[390px] text-[18px] leading-[1.35] text-[#626262]">
+                From research to final pixel, every project here is a full design process, not just a
+                pretty screen.
+              </p>
+            </div>
 
-          <div className="absolute inset-0 z-20">
-            {decorativeProjects.map((project, index) => (
-              <DecorativeProjectCard
-                key={project.id}
-                project={project}
-                index={index + projects.length}
-                progress={progress}
-                activeProject={activeProject}
-              />
-            ))}
+            <div className="absolute inset-0 z-20">
+              {decorativeProjects.map((project, index) => (
+                <DecorativeProjectCard
+                  key={project.id}
+                  project={project}
+                  index={index + projects.length}
+                  progress={projectProgress}
+                  activeProject={activeProject}
+                />
+              ))}
 
-            {projects.map((project, index) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                index={index}
-                progress={progress}
-                activeProject={activeProject}
-                activeIndex={activeIndex}
-                activeFocusOffset={activeFocusOffset}
-                onFocusProject={setActiveProject}
-              />
-            ))}
+              {projects.map((project, index) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  index={index}
+                  progress={projectProgress}
+                  activeProject={activeProject}
+                  activeIndex={activeIndex}
+                  activeFocusOffset={activeFocusOffset}
+                  onFocusProject={setActiveProject}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
+
+      <div className="h-[35vh]" aria-hidden="true" />
+
+      <div ref={aboutStageRef} className="relative h-[560vh]">
+        <div className="sticky top-0 h-screen overflow-hidden">
+          <AboutContent progress={aboutProgress} />
+        </div>
+      </div>
     </section>
+  );
+}
+
+function AboutContent({ progress }: { progress: number }) {
+  const horizontalProgress = progressBetween(progress, 0, 0.92);
+  const verticalProgress = easeInOut(progressBetween(progress, 0.2, 0.94));
+  const detailsProgress = easeOut(progressBetween(progress, 0.66, 0.88));
+  const words = ABOUT_PHRASE.split(' ');
+
+  return (
+    <div className="pointer-events-none absolute inset-0 z-50 px-5" aria-label="About">
+      <div
+        className="absolute left-1/2 top-1/2 flex -translate-y-1/2 items-center whitespace-nowrap text-[clamp(52px,8.2vw,132px)] font-black uppercase leading-none tracking-[0]"
+        style={{
+          fontFamily: "Inter, system-ui, sans-serif",
+          transform: `translate3d(calc(-50% + ${lerp(142, -78, horizontalProgress)}vw), calc(-50% - ${lerp(0, 35, verticalProgress)}vh), 0) rotate(${lerp(-1.8, 0.8, horizontalProgress)}deg)`,
+          willChange: 'transform',
+        }}
+      >
+        {words.map((word, wordIndex) => (
+          <span key={`${word}-${wordIndex}`} className="inline-flex pr-[0.24em]" aria-hidden="true">
+            {Array.from(word).map((letter, letterIndex) => {
+              const revealStart =
+                (ABOUT_WORD_REVEAL_STARTS[wordIndex] ?? 0.72) + letterIndex * 0.018;
+              const letterProgress = easeOut(
+                progressBetween(horizontalProgress, revealStart, revealStart + 0.14),
+              );
+              const fromTop = (wordIndex + letterIndex) % 2 === 0;
+              const yStart = fromTop ? -135 : 135;
+              const rotateStart = fromTop ? -8 : 8;
+
+              return (
+                <span
+                  key={`${word}-${letter}-${letterIndex}`}
+                  className="inline-block"
+                  style={{
+                    opacity: letterProgress,
+                    filter: `blur(${lerp(10, 0, letterProgress)}px)`,
+                    transform: `translate3d(0, ${lerp(yStart, 0, letterProgress)}%, 0) rotate(${lerp(rotateStart, 0, letterProgress)}deg)`,
+                    willChange: 'opacity, filter, transform',
+                  }}
+                >
+                  {letter}
+                </span>
+              );
+            })}
+          </span>
+        ))}
+      </div>
+
+      <div
+        className="absolute left-1/2 top-[55%] w-[min(84vw,760px)] -translate-x-1/2 text-center"
+        style={{
+          opacity: detailsProgress,
+          transform: `translate3d(-50%, ${lerp(58, 0, detailsProgress)}px, 0)`,
+          willChange: 'opacity, transform',
+        }}
+      >
+        {aboutDetails.map((line, index) => {
+          const lineProgress = easeOut(progressBetween(progress, 0.68 + index * 0.055, 0.82 + index * 0.055));
+
+          return (
+            <p
+              key={line}
+              className={index === 0 ? 'text-[clamp(24px,3vw,44px)] font-semibold leading-[1.05] tracking-[0]' : 'mx-auto mt-6 max-w-[620px] text-[clamp(16px,1.45vw,22px)] font-medium leading-[1.35] tracking-[0] text-[#555]'}
+              style={{
+                opacity: lineProgress,
+                filter: `blur(${lerp(8, 0, lineProgress)}px)`,
+                transform: `translateY(${lerp(32, 0, lineProgress)}px)`,
+                willChange: 'opacity, filter, transform',
+              }}
+            >
+              {line}
+            </p>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -804,6 +919,8 @@ function ProjectCard({
   const parallaxY = lerp(16 + index * 2, -34 - index * 6, galleryDrift);
   const parallaxX = Math.sin(progress * Math.PI * 1.25 + index * 0.7) * 0.35;
   const opacity = progressBetween(revealProgress, 0.08, 0.38);
+  const edgeFadeProgress = easeOut(progressBetween(progress, 0.54, 0.78));
+  const edgeMask = `linear-gradient(to bottom, #000 0%, #000 ${lerp(100, 76, edgeFadeProgress)}%, rgba(0,0,0,0) 100%)`;
   const focusScale = isActive ? 1.045 : 1;
   const distanceFromActive = activeIndex >= 0 ? Math.abs(index - activeIndex) : 0;
   const activeShiftX = isActive ? project.focusOffset?.xVw ?? 0 : 0;
@@ -839,6 +956,8 @@ function ProjectCard({
           boxShadow: isActive
             ? '0 28px 90px rgba(0,0,0,0.18)'
             : '0 18px 60px rgba(0,0,0,0.08)',
+          WebkitMaskImage: edgeMask,
+          maskImage: edgeMask,
         }}
       >
         <ProjectPlaceholder project={project} index={index} />
@@ -882,6 +1001,8 @@ function DecorativeProjectCard({
   const parallaxX = Math.sin(progress * Math.PI * 1.4 + index * 0.6) * 0.5;
   const floatY = Math.sin(progress * Math.PI * 3.4 + index * 0.72) * 5;
   const opacity = progressBetween(revealProgress, 0.08, 0.38) * (activeProject ? 0.42 : 0.7);
+  const edgeFadeProgress = easeOut(progressBetween(progress, 0.5, 0.76));
+  const edgeMask = `linear-gradient(to bottom, #000 0%, #000 ${lerp(100, 70, edgeFadeProgress)}%, rgba(0,0,0,0) 100%)`;
 
   return (
     <div
@@ -898,7 +1019,11 @@ function DecorativeProjectCard({
     >
       <div
         className="relative h-full overflow-hidden bg-white shadow-[0_18px_60px_rgba(0,0,0,0.06)]"
-        style={{ filter: 'grayscale(1) contrast(0.8) brightness(1.08)' }}
+        style={{
+          filter: 'grayscale(1) contrast(0.8) brightness(1.08)',
+          WebkitMaskImage: edgeMask,
+          maskImage: edgeMask,
+        }}
       >
         <ProjectPlaceholder project={project} index={index} />
       </div>
