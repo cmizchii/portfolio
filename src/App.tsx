@@ -2,6 +2,18 @@ import { useEffect, useRef, useState } from 'react';
 
 type Tag = { text: string; color: string; top: string; left: string };
 type Viewport = { width: number; height: number };
+type CursorTag = { id: number; x: number; y: number; tagIndex: number; rotation: number };
+type Project = {
+  id: string;
+  title: string;
+  year: string;
+  description: string;
+  accent: string;
+  position: React.CSSProperties;
+  focusOffset?: { xVw: number; yVh: number };
+  start: number;
+  end: number;
+};
 
 const tags: Tag[] = [
   { text: 'INTERACTIVE DESIGN', color: '#FF8862', top: '4%',   left: '6.3%' },
@@ -32,7 +44,7 @@ const TEXT_PAD_T = 20;
 const LINE_COLOR = '#2a2a2a';
 const BUMP_RADIUS = 130;
 const BUMP_STRENGTH = 32;
-const SCROLL_DISTANCE_VH = 556;
+const SCROLL_DISTANCE_VH = 288;
 const SCROLL_SMOOTHING = 0.14;
 const SCROLL_SETTLE_THRESHOLD = 0.0005;
 const CARD_START = 0.08;
@@ -49,6 +61,105 @@ const TAG_FADE_END = 0.75;
 const SECOND_APPEAR_START = 0.41;
 const SECOND_OPACITY_END = 0.52;
 const SECOND_BLUR_END = 0.48;
+const SECOND_EXIT_START = 0.78;
+const SECOND_EXIT_END = 0.92;
+const CURSOR_TRAIL_START = SECOND_OPACITY_END;
+const CURSOR_TRAIL_END = SECOND_EXIT_START;
+const CURSOR_TRAIL_DISTANCE = 34;
+const CURSOR_TRAIL_INTERVAL = 70;
+const CURSOR_TRAIL_LIFETIME = 920;
+const CURSOR_TRAIL_LIMIT = 16;
+
+const projects: Project[] = [
+  {
+    id: '01',
+    title: 'Lemonmade',
+    year: '2026',
+    description: 'Meeting flow concept with fast room setup, clear invites, and calm controls.',
+    accent: '#8fc7ff',
+    position: { left: '-10vw', top: '18%', width: 'min(24vw, 330px)', height: 'min(28vw, 350px)' },
+    focusOffset: { xVw: 13, yVh: 0 },
+    start: -0.04,
+    end: 0.18,
+  },
+  {
+    id: '02',
+    title: 'Inside Botanics',
+    year: '2025',
+    description: 'Editorial product page with quiet spacing, ingredient storytelling, and soft motion.',
+    accent: '#d8f26a',
+    position: { right: '-4vw', top: '13%', width: 'min(21vw, 305px)', height: 'min(27vw, 355px)' },
+    focusOffset: { xVw: -13, yVh: 0 },
+    start: -0.03,
+    end: 0.2,
+  },
+  {
+    id: '03',
+    title: 'Augen Lab',
+    year: '2025',
+    description: 'Experimental landing page with atmospheric visuals and a focused product path.',
+    accent: '#bba0ff',
+    position: { left: '39%', top: '-8%', width: 'min(18vw, 260px)', height: 'min(15vw, 218px)' },
+    focusOffset: { xVw: 0, yVh: 12 },
+    start: -0.02,
+    end: 0.22,
+  },
+  {
+    id: '04',
+    title: 'Future Fit',
+    year: '2024',
+    description: 'Fitness dashboard exploration for scanning workouts, progress, and daily goals.',
+    accent: '#ff9f72',
+    position: { right: '18%', top: '72%', width: 'min(21vw, 315px)', height: 'min(16vw, 235px)' },
+    focusOffset: { xVw: 0, yVh: -4 },
+    start: -0.01,
+    end: 0.24,
+  },
+  {
+    id: '05',
+    title: 'Signal Grid',
+    year: '2024',
+    description: 'System interface study with modular panels, comparison states, and visual hierarchy.',
+    accent: '#5dddc8',
+    position: { left: '14vw', top: '72%', width: 'min(18vw, 255px)', height: 'min(14vw, 205px)' },
+    focusOffset: { xVw: 1, yVh: -6 },
+    start: 0,
+    end: 0.26,
+  },
+];
+
+const decorativeProjects: Project[] = [
+  {
+    id: '06',
+    title: 'Orbit',
+    year: '2023',
+    description: '',
+    accent: '#e7e7e7',
+    position: { left: '7%', top: '-20%', width: 'min(17vw, 245px)', height: 'min(13vw, 190px)' },
+    start: -0.06,
+    end: 0.2,
+  },
+  {
+    id: '07',
+    title: 'Halo',
+    year: '2023',
+    description: '',
+    accent: '#f2b8ff',
+    position: { right: '-11vw', top: '43%', width: 'min(19vw, 270px)', height: 'min(17vw, 240px)' },
+    start: -0.04,
+    end: 0.24,
+  },
+  {
+    id: '08',
+    title: 'Field',
+    year: '2022',
+    description: '',
+    accent: '#bdebdc',
+    position: { right: '28%', bottom: '-23%', width: 'min(21vw, 300px)', height: 'min(18vw, 250px)' },
+    start: -0.02,
+    end: 0.28,
+  },
+];
 
 const getViewport = (): Viewport => ({
   width: typeof window === 'undefined' ? 1440 : window.innerWidth,
@@ -63,15 +174,38 @@ const easeInOut = (value: number) =>
   value < 0.5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
 const easeOut = (value: number) => 1 - Math.pow(1 - value, 3);
 const percentValue = (value: string) => Number.parseFloat(value);
+const getHexChannels = (hex: string) => {
+  const normalizedHex = hex.replace('#', '');
+
+  return {
+    red: Number.parseInt(normalizedHex.slice(0, 2), 16),
+    green: Number.parseInt(normalizedHex.slice(2, 4), 16),
+    blue: Number.parseInt(normalizedHex.slice(4, 6), 16),
+  };
+};
+const getDarkerTagTextColor = (hex: string) => {
+  const { red, green, blue } = getHexChannels(hex);
+  const intensity = 0.46;
+  const saturationBoost = 1.35;
+  const average = (red + green + blue) / 3;
+  const boostChannel = (channel: number) =>
+    clamp(Math.round((average + (channel - average) * saturationBoost) * intensity), 0, 150);
+
+  return `rgb(${boostChannel(red)}, ${boostChannel(green)}, ${boostChannel(blue)})`;
+};
 
 export default function App() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [viewport, setViewport] = useState<Viewport>(() => getViewport());
+  const [cursorTags, setCursorTags] = useState<CursorTag[]>([]);
   const scrollRef = useRef<HTMLElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollProgressRef = useRef(0);
   const targetProgressRef = useRef(0);
   const animatedProgressRef = useRef(0);
+  const cursorTagIdRef = useRef(0);
+  const lastCursorTagRef = useRef({ x: -9999, y: -9999, time: 0 });
+  const cursorTagTimeoutsRef = useRef<number[]>([]);
 
   useEffect(() => {
     let measureFrame = 0;
@@ -155,6 +289,40 @@ export default function App() {
     let my = -9999;
     let frame = 0;
 
+    const addCursorTag = (x: number, y: number) => {
+      const progress = scrollProgressRef.current;
+      if (progress < CURSOR_TRAIL_START || progress > CURSOR_TRAIL_END) return;
+
+      const now = window.performance.now();
+      const last = lastCursorTagRef.current;
+      const distance = Math.hypot(x - last.x, y - last.y);
+      if (distance < CURSOR_TRAIL_DISTANCE && now - last.time < CURSOR_TRAIL_INTERVAL) return;
+
+      const id = cursorTagIdRef.current;
+      cursorTagIdRef.current += 1;
+      lastCursorTagRef.current = { x, y, time: now };
+
+      setCursorTags((current) => [
+        ...current.slice(-(CURSOR_TRAIL_LIMIT - 1)),
+        {
+          id,
+          x,
+          y,
+          tagIndex: id % tags.length,
+          rotation: ((id % 9) - 4) * 1.8,
+        },
+      ]);
+
+      const timeout = window.setTimeout(() => {
+        setCursorTags((current) => current.filter((tag) => tag.id !== id));
+        cursorTagTimeoutsRef.current = cursorTagTimeoutsRef.current.filter(
+          (timeoutId) => timeoutId !== timeout,
+        );
+      }, CURSOR_TRAIL_LIFETIME);
+
+      cursorTagTimeoutsRef.current.push(timeout);
+    };
+
     const update = () => {
       const root = rootRef.current;
       if (!root) return;
@@ -189,6 +357,7 @@ export default function App() {
     const onMove = (e: MouseEvent) => {
       mx = e.clientX;
       my = e.clientY;
+      addCursorTag(mx, my);
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(update);
     };
@@ -197,33 +366,83 @@ export default function App() {
     return () => {
       window.removeEventListener('mousemove', onMove);
       cancelAnimationFrame(frame);
+      cursorTagTimeoutsRef.current.forEach((timeout) => window.clearTimeout(timeout));
+      cursorTagTimeoutsRef.current = [];
     };
   }, []);
 
   return (
-    <main
-      ref={scrollRef}
-      className="relative bg-[#0c0c0c]"
-      style={{ minHeight: `${SCROLL_DISTANCE_VH}vh` }}
+    <>
+      <main
+        ref={scrollRef}
+        className="relative bg-[#0c0c0c]"
+        style={{ minHeight: `${SCROLL_DISTANCE_VH}vh` }}
+      >
+        <div ref={rootRef} className="sticky top-0 h-screen w-full overflow-hidden bg-[#0c0c0c]">
+          <Lines progress={scrollProgress} viewport={viewport} />
+
+          <Card progress={scrollProgress} viewport={viewport} />
+          <CornerSquare side="tl" color="#B85AC8" progress={scrollProgress} viewport={viewport} />
+          <CornerSquare side="tr" color="#EE6FAF" progress={scrollProgress} viewport={viewport} />
+          <CornerSquare side="bl" color="#5DDDC8" progress={scrollProgress} viewport={viewport} />
+          <CornerSquare side="br" color="#FFA858" progress={scrollProgress} viewport={viewport} />
+
+          <HeroText progress={scrollProgress} viewport={viewport} />
+
+          <SecondScreen progress={scrollProgress} />
+          <CursorTagTrail points={cursorTags} progress={scrollProgress} />
+
+          {tags.map((tag, i) => (
+            <FloatingTag key={tag.text} {...tag} index={i} progress={scrollProgress} />
+          ))}
+        </div>
+      </main>
+
+      <ProjectsSection />
+    </>
+  );
+}
+
+function CursorTagTrail({ points, progress }: { points: CursorTag[]; progress: number }) {
+  const enterProgress = easeOut(progressBetween(progress, CURSOR_TRAIL_START, CURSOR_TRAIL_START + 0.06));
+  const exitProgress = easeOut(progressBetween(progress, CURSOR_TRAIL_END, SECOND_EXIT_END));
+  const opacity = enterProgress * (1 - exitProgress);
+
+  if (points.length === 0) return null;
+
+  return (
+    <div
+      className="pointer-events-none absolute inset-0 z-[65]"
+      style={{
+        opacity,
+        transition: 'opacity 180ms ease',
+        willChange: 'opacity',
+      }}
+      aria-hidden="true"
     >
-      <div ref={rootRef} className="sticky top-0 h-screen w-full overflow-hidden bg-[#0c0c0c]">
-        <Lines progress={scrollProgress} viewport={viewport} />
+      {points.map((point) => {
+        const tag = tags[point.tagIndex % tags.length];
 
-        <Card progress={scrollProgress} viewport={viewport} />
-        <CornerSquare side="tl" color="#B85AC8" progress={scrollProgress} viewport={viewport} />
-        <CornerSquare side="tr" color="#EE6FAF" progress={scrollProgress} viewport={viewport} />
-        <CornerSquare side="bl" color="#5DDDC8" progress={scrollProgress} viewport={viewport} />
-        <CornerSquare side="br" color="#FFA858" progress={scrollProgress} viewport={viewport} />
-
-        <HeroText progress={scrollProgress} viewport={viewport} />
-
-        <SecondScreen progress={scrollProgress} />
-
-        {tags.map((tag, i) => (
-          <FloatingTag key={tag.text} {...tag} index={i} progress={scrollProgress} />
-        ))}
-      </div>
-    </main>
+        return (
+          <div
+            key={point.id}
+            className="cursor-tag-ink absolute select-none whitespace-nowrap px-[10px] py-[4px] text-[11px] font-bold uppercase tracking-[0.04em]"
+            style={
+              {
+                left: `${point.x}px`,
+                top: `${point.y}px`,
+                backgroundColor: tag.color,
+                color: getDarkerTagTextColor(tag.color),
+                fontFamily: "'Familjen Grotesk', Inter, system-ui, sans-serif",
+                '--ink-rotate': `${point.rotation}deg`,
+              } as React.CSSProperties
+            }
+          >
+            {tag.text}
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -267,10 +486,12 @@ function FloatingTag({
       }}
     >
       <div
-        className="float-tag select-none whitespace-nowrap px-[10px] py-[4px] text-[11px] font-bold uppercase tracking-[0.04em] text-black"
+        className="float-tag select-none whitespace-nowrap px-[10px] py-[4px] text-[11px] font-bold uppercase tracking-[0.04em]"
         style={
           {
             backgroundColor: color,
+            color: getDarkerTagTextColor(color),
+            fontFamily: "'Familjen Grotesk', Inter, system-ui, sans-serif",
             '--delay': `${-floatDelay}s`,
             '--dur': `${floatDur}s`,
             '--tilt': `${tilt}deg`,
@@ -338,13 +559,14 @@ function HeroText({ progress, viewport }: { progress: number; viewport: Viewport
   const fadeProgress = easeOut(progressBetween(progress, 0, HERO_TEXT_END));
   return (
     <div
-      className="pointer-events-none absolute text-[18px] font-medium leading-[1.25] tracking-[-0.01em] text-black"
+      className="pointer-events-none absolute text-[18px] font-semibold leading-[1.25] tracking-[-0.01em] text-black"
       style={{
         zIndex: 35,
         left: viewport.width / 2 - CARD_W / 2 + TEXT_PAD_L,
         top: viewport.height / 2 - CARD_H / 2 + TEXT_PAD_T,
         opacity: 1 - fadeProgress,
         transform: `translateY(${lerp(0, 8, fadeProgress)}px)`,
+        fontFamily: "Inter, system-ui, sans-serif",
       }}
     >
       <p>Have an idea?</p>
@@ -395,23 +617,354 @@ function CornerSquare({
 function SecondScreen({ progress }: { progress: number }) {
   const opacityProgress = easeOut(progressBetween(progress, SECOND_APPEAR_START, SECOND_OPACITY_END));
   const blurProgress = easeOut(progressBetween(progress, SECOND_APPEAR_START, SECOND_BLUR_END));
+  const exitProgress = easeOut(progressBetween(progress, SECOND_EXIT_START, SECOND_EXIT_END));
   return (
     <div
       className="pointer-events-none absolute inset-0 z-40 flex flex-col items-center justify-center px-6"
       style={{
-        opacity: opacityProgress,
-        filter: `blur(${lerp(28, 0, blurProgress)}px)`,
-        willChange: 'opacity, filter',
+        opacity: opacityProgress * (1 - exitProgress),
+        filter: `blur(${lerp(28, 0, blurProgress) + lerp(0, 24, exitProgress)}px)`,
+        transform: `translateY(${-lerp(0, 20, exitProgress)}px)`,
+        willChange: 'opacity, filter, transform',
       }}
     >
-      <div className="mb-7 inline-block bg-black px-3 py-[6px] text-[12px] font-bold uppercase tracking-[0.06em] text-white">
+      <div
+        className="mb-7 inline-block bg-black px-3 py-[6px] text-[12px] font-bold uppercase tracking-[0.06em] text-white"
+        style={{ fontFamily: "'Familjen Grotesk', Inter, system-ui, sans-serif" }}
+      >
         UX/UI DESIGNER &amp; FRONT-END DEV
       </div>
-      <h1 className="max-w-[920px] text-center text-[44px] font-bold leading-[1.18] tracking-[-0.015em] text-black">
+      <h1
+        className="max-w-[920px] text-center text-[44px] font-semibold leading-[1.18] tracking-[-0.015em] text-black"
+        style={{ fontFamily: "Inter, system-ui, sans-serif" }}
+      >
         Designing interfaces that feel
         <br />
         right &mdash; clean, human, intentional.
       </h1>
+    </div>
+  );
+}
+
+function ProjectsSection() {
+  const [progress, setProgress] = useState(0);
+  const [activeProject, setActiveProject] = useState<string | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      const section = sectionRef.current;
+      if (!section) return;
+
+      const sectionTop = section.getBoundingClientRect().top + window.scrollY;
+      const scrollRange = Math.max(1, section.offsetHeight - window.innerHeight);
+      const nextProgress = clamp((window.scrollY - sectionTop) / scrollRange);
+
+      setProgress((current) => (Math.abs(current - nextProgress) > 0.001 ? nextProgress : current));
+    };
+
+    const requestUpdate = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(update);
+    };
+
+    requestUpdate();
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+
+    return () => {
+      window.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  const sceneProgress = lerp(0.28, 1, easeOut(progressBetween(progress, 0, 0.14)));
+  const introFocusBlur = activeProject ? 4 : 0;
+  const introOpacity = activeProject ? 0.72 : 1;
+  const activeIndex = activeProject ? projects.findIndex((project) => project.id === activeProject) : -1;
+  const activeFocusOffset = activeIndex >= 0 ? projects[activeIndex].focusOffset : undefined;
+
+  const updateActiveProject = (clientX: number, clientY: number) => {
+    const section = sectionRef.current;
+    if (!section) return;
+
+    let closestProject: string | null = null;
+    let closestDistance = Number.POSITIVE_INFINITY;
+
+    section.querySelectorAll<HTMLElement>('.project-card').forEach((card) => {
+      const rect = card.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const distance = Math.hypot(clientX - centerX, clientY - centerY);
+
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestProject = card.dataset.projectId ?? null;
+      }
+    });
+
+    setActiveProject(closestDistance < 280 ? closestProject : null);
+  };
+
+  return (
+    <section
+      ref={sectionRef}
+      className="relative min-h-[220vh] bg-white text-black"
+      aria-label="Selected projects"
+    >
+      <div
+        className="sticky top-0 h-screen overflow-hidden"
+        onMouseMove={(event) => updateActiveProject(event.clientX, event.clientY)}
+        onMouseLeave={() => setActiveProject(null)}
+      >
+        <div
+          className="absolute inset-0"
+          style={{
+            opacity: sceneProgress,
+            transform: `translateY(${lerp(18, 0, sceneProgress)}vh)`,
+            willChange: 'opacity, transform',
+          }}
+        >
+          <div
+            className="pointer-events-none absolute left-1/2 top-1/2 z-40 w-[min(86vw,560px)] -translate-x-1/2 -translate-y-1/2 text-center"
+            style={{
+              opacity: introOpacity,
+              filter: `blur(${introFocusBlur}px)`,
+              transition: 'filter 260ms ease, opacity 260ms ease',
+            }}
+          >
+            <h2
+              className="text-[clamp(48px,7vw,82px)] font-medium leading-none tracking-[0]"
+              style={{ fontFamily: "'Instrument Sans', Inter, system-ui, sans-serif" }}
+            >
+              MY WORK
+            </h2>
+            <p className="mx-auto mt-8 max-w-[390px] text-[18px] leading-[1.35] text-[#626262]">
+              From research to final pixel, every project here is a full design process, not just a
+              pretty screen.
+            </p>
+          </div>
+
+          <div className="absolute inset-0 z-20">
+            {decorativeProjects.map((project, index) => (
+              <DecorativeProjectCard
+                key={project.id}
+                project={project}
+                index={index + projects.length}
+                progress={progress}
+                activeProject={activeProject}
+              />
+            ))}
+
+            {projects.map((project, index) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                index={index}
+                progress={progress}
+                activeProject={activeProject}
+                activeIndex={activeIndex}
+                activeFocusOffset={activeFocusOffset}
+                onFocusProject={setActiveProject}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ProjectCard({
+  project,
+  index,
+  progress,
+  activeProject,
+  activeIndex,
+  activeFocusOffset,
+  onFocusProject,
+}: {
+  project: Project;
+  index: number;
+  progress: number;
+  activeProject: string | null;
+  activeIndex: number;
+  activeFocusOffset?: { xVw: number; yVh: number };
+  onFocusProject: (id: string | null) => void;
+}) {
+  const revealProgress = easeOut(progressBetween(progress, project.start, project.end));
+  const isActive = activeProject === project.id;
+  const isDimmed = activeProject !== null && !isActive;
+  const galleryDrift = easeInOut(progress);
+  const lift = lerp(12, 0, revealProgress);
+  const parallaxY = lerp(16 + index * 2, -34 - index * 6, galleryDrift);
+  const parallaxX = Math.sin(progress * Math.PI * 1.25 + index * 0.7) * 0.35;
+  const opacity = progressBetween(revealProgress, 0.08, 0.38);
+  const focusScale = isActive ? 1.045 : 1;
+  const distanceFromActive = activeIndex >= 0 ? Math.abs(index - activeIndex) : 0;
+  const activeShiftX = isActive ? project.focusOffset?.xVw ?? 0 : 0;
+  const activeShiftY = isActive ? project.focusOffset?.yVh ?? 0 : 0;
+  const fieldFollow = isDimmed ? 0.32 + ((index % 3) * 0.11) + distanceFromActive * 0.05 : 0;
+  const proximityShiftX = lerp(0, activeFocusOffset?.xVw ?? 0, fieldFollow);
+  const proximityShiftY = lerp(0, activeFocusOffset?.yVh ?? 0, fieldFollow);
+  const floatY = Math.sin(progress * Math.PI * 3 + index * 0.85) * 4;
+
+  return (
+    <article
+      tabIndex={0}
+      data-project-id={project.id}
+      onFocus={() => onFocusProject(project.id)}
+      onBlur={() => onFocusProject(null)}
+      className="project-card absolute outline-none"
+      style={{
+        ...project.position,
+        zIndex: isActive ? 30 : 12 + index,
+        opacity,
+        transform: `translate3d(calc(${parallaxX}vw + ${proximityShiftX + activeShiftX}vw), calc(${lift + activeShiftY}vh + ${parallaxY + proximityShiftY + floatY}px), 0) scale(${focusScale})`,
+        transition:
+          'filter 520ms cubic-bezier(0.22, 1, 0.36, 1), transform 760ms cubic-bezier(0.22, 1, 0.36, 1), opacity 420ms ease',
+        filter: isDimmed ? 'blur(8px)' : 'blur(0px)',
+      }}
+    >
+      <div
+        className="relative h-full overflow-hidden bg-white shadow-[0_18px_60px_rgba(0,0,0,0.08)]"
+        style={{
+          filter: `${isActive ? 'grayscale(0)' : 'grayscale(1)'} ${isDimmed ? 'contrast(0.82) brightness(1.06)' : 'contrast(0.94) brightness(1.02)'}`,
+          transition:
+            'filter 520ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 520ms cubic-bezier(0.22, 1, 0.36, 1)',
+          boxShadow: isActive
+            ? '0 28px 90px rgba(0,0,0,0.18)'
+            : '0 18px 60px rgba(0,0,0,0.08)',
+        }}
+      >
+        <ProjectPlaceholder project={project} index={index} />
+      </div>
+
+      <div
+        className="mt-4 grid grid-cols-[44px_1fr] gap-x-4 text-black"
+        style={{
+          opacity: isActive ? 1 : 0,
+          transform: `translateY(${isActive ? 0 : -8}px)`,
+          transition: 'opacity 420ms ease, transform 520ms cubic-bezier(0.22, 1, 0.36, 1)',
+        }}
+      >
+        <div className="text-[15px] leading-none text-[#555]">{project.id}</div>
+        <div>
+          <div className="flex items-baseline justify-between gap-4">
+            <h3 className="text-[18px] font-medium leading-none tracking-[0]">{project.title}</h3>
+            <div className="text-[12px] leading-none text-[#777]">{project.year}</div>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function DecorativeProjectCard({
+  project,
+  index,
+  progress,
+  activeProject,
+}: {
+  project: Project;
+  index: number;
+  progress: number;
+  activeProject: string | null;
+}) {
+  const revealProgress = easeOut(progressBetween(progress, project.start, project.end));
+  const galleryDrift = easeInOut(progress);
+  const lift = lerp(16, 0, revealProgress);
+  const parallaxY = lerp(18 + index * 2, -42 - index * 5, galleryDrift);
+  const parallaxX = Math.sin(progress * Math.PI * 1.4 + index * 0.6) * 0.5;
+  const floatY = Math.sin(progress * Math.PI * 3.4 + index * 0.72) * 5;
+  const opacity = progressBetween(revealProgress, 0.08, 0.38) * (activeProject ? 0.42 : 0.7);
+
+  return (
+    <div
+      className="pointer-events-none absolute"
+      style={{
+        ...project.position,
+        zIndex: 4 + index,
+        opacity,
+        transform: `translate3d(${parallaxX}vw, calc(${lift}vh + ${parallaxY + floatY}px), 0)`,
+        filter: activeProject ? 'blur(16px)' : 'blur(8px)',
+        transition: 'filter 280ms ease, opacity 260ms ease',
+      }}
+      aria-hidden="true"
+    >
+      <div
+        className="relative h-full overflow-hidden bg-white shadow-[0_18px_60px_rgba(0,0,0,0.06)]"
+        style={{ filter: 'grayscale(1) contrast(0.8) brightness(1.08)' }}
+      >
+        <ProjectPlaceholder project={project} index={index} />
+      </div>
+    </div>
+  );
+}
+
+function ProjectPlaceholder({ project, index }: { project: Project; index: number }) {
+  const lineCount = index % 2 === 0 ? 4 : 3;
+
+  return (
+    <div
+      className="relative h-full w-full overflow-hidden"
+      style={{
+        background: `linear-gradient(135deg, #ffffff 0%, #f2f2f0 45%, ${project.accent} 140%)`,
+      }}
+    >
+      <div className="absolute left-[7%] right-[7%] top-[7%] flex items-center justify-between text-[10px] font-medium uppercase tracking-[0.08em] text-[#8a8a8a]">
+        <span>{project.title}</span>
+        <span>{project.year}</span>
+      </div>
+
+      <div
+        className="absolute rounded-full opacity-80 blur-[2px]"
+        style={{
+          width: '44%',
+          aspectRatio: '1 / 1',
+          left: `${18 + index * 4}%`,
+          top: `${22 + (index % 3) * 7}%`,
+          background: `radial-gradient(circle at 35% 30%, #ffffff 0%, ${project.accent} 48%, #111111 130%)`,
+        }}
+      />
+      <div
+        className="absolute rounded-[999px] bg-black/70"
+        style={{
+          width: '34%',
+          height: '7%',
+          left: index % 2 === 0 ? '54%' : '12%',
+          top: index % 2 === 0 ? '49%' : '58%',
+        }}
+      />
+      <div
+        className="absolute rounded-[999px] bg-white/90"
+        style={{
+          width: '28%',
+          height: '6%',
+          left: index % 2 === 0 ? '10%' : '58%',
+          top: index % 2 === 0 ? '74%' : '28%',
+          boxShadow: '0 10px 28px rgba(0,0,0,0.08)',
+        }}
+      />
+
+      <div className="absolute bottom-[10%] left-[8%] right-[8%]">
+        <div className="mb-5 h-px w-full bg-black/10" />
+        {Array.from({ length: lineCount }).map((_, lineIndex) => (
+          <div
+            key={lineIndex}
+            className="mb-2 h-[6px] rounded-full bg-black/[0.12]"
+            style={{ width: `${82 - lineIndex * 14}%` }}
+          />
+        ))}
+      </div>
+
+      <div className="absolute bottom-[7%] right-[7%] text-[11px] text-[#606060]">
+        @{project.id}
+      </div>
     </div>
   );
 }
