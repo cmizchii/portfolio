@@ -14,6 +14,23 @@ type Project = {
   start: number;
   end: number;
 };
+type ProjectMotion = {
+  riseStart: number;
+  riseEnd: number;
+  enterDistance: number;
+  exitStart: number;
+  exitEnd: number;
+  exitDistance: number;
+  driftSpeed: number;
+  driftOffset: number;
+  driftStart: number;
+  driftEnd: number;
+  xAmplitude: number;
+  floatAmplitude: number;
+  exitX: number;
+  transitionMs: number;
+  opacityMs: number;
+};
 
 const tags: Tag[] = [
   { text: 'INTERACTIVE DESIGN', color: '#FF8862', top: '4%',   left: '6.3%' },
@@ -44,35 +61,172 @@ const TEXT_PAD_T = 20;
 const LINE_COLOR = '#2a2a2a';
 const BUMP_RADIUS = 130;
 const BUMP_STRENGTH = 32;
-const SCROLL_DISTANCE_VH = 271;
+const SCROLL_DISTANCE_VH = 286;
 const SCROLL_SMOOTHING = 0.14;
 const SCROLL_SETTLE_THRESHOLD = 0.0005;
 const CARD_START = 0.08;
-const CARD_END = 0.58;
-const HERO_TEXT_END = 0.18;
-const LINE_FADE_START = 0.5;
-const LINE_FADE_END = 0.65;
+const CARD_END = 0.74;
+const HERO_TEXT_END = 0.29;
+const LINE_FADE_START = 0.64;
+const LINE_FADE_END = 0.82;
 const TAG_MOVE_START_BASE = 0.08;
 const TAG_MOVE_START_SPAN = 0.16;
-const TAG_MOVE_END_BASE = 0.66;
+const TAG_MOVE_END_BASE = 0.78;
 const TAG_MOVE_END_SPAN = 0.04;
 const TAG_FADE_START = 0.45;
 const TAG_FADE_END = 0.75;
-const SECOND_APPEAR_START = 0.41;
-const SECOND_OPACITY_END = 0.52;
-const SECOND_BLUR_END = 0.48;
-const SECOND_EXIT_START = 0.78;
-const SECOND_EXIT_END = 0.92;
+const SECOND_APPEAR_START = 0.54;
+const SECOND_OPACITY_END = 0.72;
+const SECOND_BLUR_END = 0.7;
+const SECOND_EXIT_START = 0.81;
+const SECOND_EXIT_BLUR_START = 0.842;
+const SECOND_EXIT_END = 0.97;
 const CURSOR_TRAIL_START = SECOND_OPACITY_END;
 const CURSOR_TRAIL_END = SECOND_EXIT_START;
 const CURSOR_TRAIL_DISTANCE = 34;
 const CURSOR_TRAIL_INTERVAL = 70;
 const CURSOR_TRAIL_LIFETIME = 920;
 const CURSOR_TRAIL_LIMIT = 16;
-const PROJECT_EXIT_START = 0.76;
-const PROJECT_EXIT_END = 1;
 const ABOUT_PHRASE = 'I WANNA BE WHERE THE PEOPLE ARE';
 const ABOUT_WORD_REVEAL_STARTS = [0.08, 0.13, 0.25, 0.36, 0.49, 0.6, 0.7];
+const projectMotionProfiles: ProjectMotion[] = [
+  {
+    riseStart: 0.02,
+    riseEnd: 0.18,
+    enterDistance: 72,
+    exitStart: 0.48,
+    exitEnd: 0.78,
+    exitDistance: -96,
+    driftSpeed: 0.84,
+    driftOffset: 0.06,
+    driftStart: 14,
+    driftEnd: -20,
+    xAmplitude: 0.46,
+    floatAmplitude: 3.5,
+    exitX: -3.2,
+    transitionMs: 820,
+    opacityMs: 560,
+  },
+  {
+    riseStart: 0.02,
+    riseEnd: 0.21,
+    enterDistance: 66,
+    exitStart: 0.51,
+    exitEnd: 0.8,
+    exitDistance: -82,
+    driftSpeed: 1.08,
+    driftOffset: -0.02,
+    driftStart: 20,
+    driftEnd: -32,
+    xAmplitude: 0.3,
+    floatAmplitude: 5,
+    exitX: 2.4,
+    transitionMs: 960,
+    opacityMs: 680,
+  },
+  {
+    riseStart: 0.03,
+    riseEnd: 0.27,
+    enterDistance: 80,
+    exitStart: 0.64,
+    exitEnd: 0.91,
+    exitDistance: -88,
+    driftSpeed: 0.72,
+    driftOffset: 0.12,
+    driftStart: 12,
+    driftEnd: -24,
+    xAmplitude: 0.58,
+    floatAmplitude: 4.2,
+    exitX: 1.6,
+    transitionMs: 760,
+    opacityMs: 620,
+  },
+  {
+    riseStart: 0.04,
+    riseEnd: 0.3,
+    enterDistance: 90,
+    exitStart: 0.7,
+    exitEnd: 1,
+    exitDistance: -74,
+    driftSpeed: 1.18,
+    driftOffset: -0.1,
+    driftStart: 24,
+    driftEnd: -40,
+    xAmplitude: 0.36,
+    floatAmplitude: 5.6,
+    exitX: -1.7,
+    transitionMs: 1040,
+    opacityMs: 720,
+  },
+  {
+    riseStart: 0.03,
+    riseEnd: 0.24,
+    enterDistance: 76,
+    exitStart: 0.66,
+    exitEnd: 0.94,
+    exitDistance: -104,
+    driftSpeed: 0.96,
+    driftOffset: 0.02,
+    driftStart: 18,
+    driftEnd: -30,
+    xAmplitude: 0.42,
+    floatAmplitude: 4.8,
+    exitX: 2.9,
+    transitionMs: 900,
+    opacityMs: 640,
+  },
+  {
+    riseStart: 0.025,
+    riseEnd: 0.22,
+    enterDistance: 84,
+    exitStart: 0.64,
+    exitEnd: 0.9,
+    exitDistance: -78,
+    driftSpeed: 0.8,
+    driftOffset: 0.09,
+    driftStart: 16,
+    driftEnd: -28,
+    xAmplitude: 0.52,
+    floatAmplitude: 4,
+    exitX: -2.5,
+    transitionMs: 840,
+    opacityMs: 600,
+  },
+  {
+    riseStart: 0.045,
+    riseEnd: 0.28,
+    enterDistance: 92,
+    exitStart: 0.72,
+    exitEnd: 0.98,
+    exitDistance: -92,
+    driftSpeed: 1.12,
+    driftOffset: -0.06,
+    driftStart: 22,
+    driftEnd: -38,
+    xAmplitude: 0.34,
+    floatAmplitude: 5.4,
+    exitX: 2,
+    transitionMs: 1000,
+    opacityMs: 700,
+  },
+  {
+    riseStart: 0.055,
+    riseEnd: 0.32,
+    enterDistance: 98,
+    exitStart: 0.76,
+    exitEnd: 1,
+    exitDistance: -70,
+    driftSpeed: 1.24,
+    driftOffset: -0.14,
+    driftStart: 28,
+    driftEnd: -44,
+    xAmplitude: 0.28,
+    floatAmplitude: 5.8,
+    exitX: -2,
+    transitionMs: 1080,
+    opacityMs: 760,
+  },
+];
 const aboutDetails = [
   'I build interfaces around how people actually move.',
   'Research, structure, visual polish, and front-end thinking stay connected from the first idea to the final interaction.',
@@ -182,6 +336,12 @@ const progressBetween = (value: number, start: number, end: number) =>
 const easeInOut = (value: number) =>
   value < 0.5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
 const easeOut = (value: number) => 1 - Math.pow(1 - value, 3);
+const easeSoft = (value: number) => {
+  const clamped = clamp(value);
+
+  return clamped * clamped * clamped * (clamped * (clamped * 6 - 15) + 10);
+};
+const getProjectMotion = (index: number) => projectMotionProfiles[index % projectMotionProfiles.length];
 const percentValue = (value: string) => Number.parseFloat(value);
 const getHexChannels = (hex: string) => {
   const normalizedHex = hex.replace('#', '');
@@ -626,13 +786,14 @@ function CornerSquare({
 function SecondScreen({ progress }: { progress: number }) {
   const opacityProgress = easeOut(progressBetween(progress, SECOND_APPEAR_START, SECOND_OPACITY_END));
   const blurProgress = easeOut(progressBetween(progress, SECOND_APPEAR_START, SECOND_BLUR_END));
-  const exitProgress = easeOut(progressBetween(progress, SECOND_EXIT_START, SECOND_EXIT_END));
+  const exitProgress = easeSoft(progressBetween(progress, SECOND_EXIT_START, SECOND_EXIT_END));
+  const exitBlurProgress = easeSoft(progressBetween(progress, SECOND_EXIT_BLUR_START, SECOND_EXIT_END));
   return (
     <div
       className="pointer-events-none absolute inset-0 z-40 flex flex-col items-center justify-center px-6"
       style={{
         opacity: opacityProgress * (1 - exitProgress),
-        filter: `blur(${lerp(28, 0, blurProgress) + lerp(0, 24, exitProgress)}px)`,
+        filter: `blur(${lerp(28, 0, blurProgress) + lerp(0, 24, exitBlurProgress)}px)`,
         transform: `translateY(${-lerp(0, 20, exitProgress)}px)`,
         willChange: 'opacity, filter, transform',
       }}
@@ -704,13 +865,14 @@ function ProjectsSection() {
     };
   }, []);
 
-  const sceneRevealProgress = easeInOut(progressBetween(projectProgress, 0.05, 0.24));
-  const sceneProgress = lerp(0.34, 1, easeInOut(progressBetween(projectProgress, 0, 0.13)));
-  const sceneExitProgress = easeInOut(progressBetween(projectProgress, PROJECT_EXIT_START, PROJECT_EXIT_END));
-  const sceneBlur = lerp(18, 0, sceneRevealProgress);
-  const sceneLift = lerp(18, 0, sceneRevealProgress) - lerp(0, 30, sceneExitProgress);
+  const sceneEnterProgress = easeSoft(progressBetween(projectProgress, 0, 0.2));
   const introFocusBlur = activeProject ? 4 : 0;
-  const introOpacity = activeProject ? 0.72 : 1;
+  const introHoverOpacity = activeProject ? 0.72 : 1;
+  const introExitProgress = easeInOut(progressBetween(projectProgress, 0.57, 0.81));
+  const introExitFadeProgress = easeSoft(progressBetween(projectProgress, 0.67, 0.84));
+  const introBlur = lerp(18, 0, sceneEnterProgress) + lerp(0, 20, introExitProgress);
+  const introY = lerp(44, 0, sceneEnterProgress) + lerp(0, -72, introExitProgress);
+  const introOpacity = sceneEnterProgress * (1 - introExitFadeProgress) * introHoverOpacity;
   const activeIndex = activeProject ? projects.findIndex((project) => project.id === activeProject) : -1;
   const activeFocusOffset = activeIndex >= 0 ? projects[activeIndex].focusOffset : undefined;
 
@@ -742,7 +904,7 @@ function ProjectsSection() {
       className="relative bg-white text-black"
       aria-label="Selected projects and about"
     >
-      <div ref={projectStageRef} className="relative h-[360vh]">
+      <div ref={projectStageRef} className="relative h-[460vh]">
         <div
           className="sticky top-0 h-screen overflow-hidden"
           onMouseMove={(event) => updateActiveProject(event.clientX, event.clientY)}
@@ -751,27 +913,30 @@ function ProjectsSection() {
           <div
             className="absolute inset-0"
             style={{
-              opacity: sceneProgress,
-              filter: `blur(${sceneBlur}px)`,
-              transform: `translateY(${sceneLift}vh)`,
-              willChange: 'opacity, filter, transform',
+              willChange: 'opacity, transform',
             }}
           >
             <div
               className="pointer-events-none absolute left-1/2 top-1/2 z-40 w-[min(86vw,560px)] -translate-x-1/2 -translate-y-1/2 text-center"
               style={{
                 opacity: introOpacity,
-                filter: `blur(${introFocusBlur}px)`,
-                transition: 'filter 260ms ease, opacity 260ms ease',
+                filter: `blur(${introBlur + introFocusBlur}px)`,
+                transform: `translate3d(-50%, calc(-50% + ${introY}px), 0)`,
+                transition: 'filter 260ms ease, opacity 260ms ease, transform 640ms cubic-bezier(0.22, 1, 0.36, 1)',
+                willChange: 'opacity, filter, transform',
               }}
             >
               <h2
                 className="text-[clamp(48px,7vw,82px)] font-medium leading-none tracking-[0]"
-                style={{ fontFamily: "'Instrument Sans', Inter, system-ui, sans-serif" }}
+                style={{
+                  fontFamily: "'Instrument Sans', Inter, system-ui, sans-serif",
+                }}
               >
                 MY WORK
               </h2>
-              <p className="mx-auto mt-8 max-w-[390px] text-[18px] leading-[1.35] text-[#626262]">
+              <p
+                className="mx-auto mt-8 max-w-[390px] text-[18px] leading-[1.35] text-[#626262]"
+              >
                 From research to final pixel, every project here is a full design process, not just a
                 pretty screen.
               </p>
@@ -805,7 +970,7 @@ function ProjectsSection() {
         </div>
       </div>
 
-      <div className="h-[35vh]" aria-hidden="true" />
+      <div className="h-[21vh]" aria-hidden="true" />
 
       <div ref={aboutStageRef} className="relative h-[560vh]">
         <div className="sticky top-0 h-screen overflow-hidden">
@@ -911,16 +1076,22 @@ function ProjectCard({
   activeFocusOffset?: { xVw: number; yVh: number };
   onFocusProject: (id: string | null) => void;
 }) {
-  const revealProgress = easeOut(progressBetween(progress, project.start, project.end));
+  const motion = getProjectMotion(index);
+  const sectionEnterProgress = easeSoft(progressBetween(progress, 0, 0.2));
+  const riseProgress = easeOut(progressBetween(progress, motion.riseStart, motion.riseEnd));
+  const exitProgress = easeInOut(progressBetween(progress, motion.exitStart, motion.exitEnd));
+  const exitFadeProgress = easeSoft(progressBetween(progress, motion.exitStart + 0.1, motion.exitEnd));
   const isActive = activeProject === project.id;
   const isDimmed = activeProject !== null && !isActive;
-  const galleryDrift = easeInOut(progress);
-  const lift = lerp(12, 0, revealProgress);
-  const parallaxY = lerp(16 + index * 2, -34 - index * 6, galleryDrift);
-  const parallaxX = Math.sin(progress * Math.PI * 1.25 + index * 0.7) * 0.35;
-  const opacity = progressBetween(revealProgress, 0.08, 0.38);
-  const edgeFadeProgress = easeOut(progressBetween(progress, 0.54, 0.78));
-  const edgeMask = `linear-gradient(to bottom, #000 0%, #000 ${lerp(100, 76, edgeFadeProgress)}%, rgba(0,0,0,0) 100%)`;
+  const galleryDrift = easeInOut(clamp(progress * motion.driftSpeed + motion.driftOffset));
+  const lift = lerp(motion.enterDistance, 0, riseProgress) + lerp(0, motion.exitDistance, exitProgress);
+  const parallaxY = lerp(motion.driftStart, motion.driftEnd, galleryDrift);
+  const parallaxX =
+    Math.sin(progress * Math.PI * (1.08 + motion.driftSpeed * 0.2) + index * 0.7) *
+      motion.xAmplitude +
+    lerp(0, motion.exitX, exitProgress);
+  const opacity = sectionEnterProgress * (1 - exitFadeProgress);
+  const scrollBlur = lerp(18, 0, sectionEnterProgress) + lerp(0, 22, exitProgress);
   const focusScale = isActive ? 1.045 : 1;
   const distanceFromActive = activeIndex >= 0 ? Math.abs(index - activeIndex) : 0;
   const activeShiftX = isActive ? project.focusOffset?.xVw ?? 0 : 0;
@@ -928,7 +1099,9 @@ function ProjectCard({
   const fieldFollow = isDimmed ? 0.32 + ((index % 3) * 0.11) + distanceFromActive * 0.05 : 0;
   const proximityShiftX = lerp(0, activeFocusOffset?.xVw ?? 0, fieldFollow);
   const proximityShiftY = lerp(0, activeFocusOffset?.yVh ?? 0, fieldFollow);
-  const floatY = Math.sin(progress * Math.PI * 3 + index * 0.85) * 4;
+  const floatY =
+    Math.sin(progress * Math.PI * (2.6 + motion.driftSpeed) + index * 0.85) *
+    motion.floatAmplitude;
 
   return (
     <article
@@ -943,8 +1116,8 @@ function ProjectCard({
         opacity,
         transform: `translate3d(calc(${parallaxX}vw + ${proximityShiftX + activeShiftX}vw), calc(${lift + activeShiftY}vh + ${parallaxY + proximityShiftY + floatY}px), 0) scale(${focusScale})`,
         transition:
-          'filter 520ms cubic-bezier(0.22, 1, 0.36, 1), transform 760ms cubic-bezier(0.22, 1, 0.36, 1), opacity 420ms ease',
-        filter: isDimmed ? 'blur(8px)' : 'blur(0px)',
+          `filter 520ms cubic-bezier(0.22, 1, 0.36, 1), transform ${motion.transitionMs}ms cubic-bezier(0.22, 1, 0.36, 1), opacity ${motion.opacityMs}ms ease-out`,
+        filter: `blur(${Math.max(scrollBlur, isDimmed ? 8 : 0)}px)`,
       }}
     >
       <div
@@ -956,8 +1129,6 @@ function ProjectCard({
           boxShadow: isActive
             ? '0 28px 90px rgba(0,0,0,0.18)'
             : '0 18px 60px rgba(0,0,0,0.08)',
-          WebkitMaskImage: edgeMask,
-          maskImage: edgeMask,
         }}
       >
         <ProjectPlaceholder project={project} index={index} />
@@ -968,7 +1139,7 @@ function ProjectCard({
         style={{
           opacity: isActive ? 1 : 0,
           transform: `translateY(${isActive ? 0 : -8}px)`,
-          transition: 'opacity 420ms ease, transform 520ms cubic-bezier(0.22, 1, 0.36, 1)',
+          transition: `opacity ${motion.opacityMs}ms ease, transform ${motion.transitionMs}ms cubic-bezier(0.22, 1, 0.36, 1)`,
         }}
       >
         <div className="text-[15px] leading-none text-[#555]">{project.id}</div>
@@ -994,15 +1165,23 @@ function DecorativeProjectCard({
   progress: number;
   activeProject: string | null;
 }) {
-  const revealProgress = easeOut(progressBetween(progress, project.start, project.end));
-  const galleryDrift = easeInOut(progress);
-  const lift = lerp(16, 0, revealProgress);
-  const parallaxY = lerp(18 + index * 2, -42 - index * 5, galleryDrift);
-  const parallaxX = Math.sin(progress * Math.PI * 1.4 + index * 0.6) * 0.5;
-  const floatY = Math.sin(progress * Math.PI * 3.4 + index * 0.72) * 5;
-  const opacity = progressBetween(revealProgress, 0.08, 0.38) * (activeProject ? 0.42 : 0.7);
-  const edgeFadeProgress = easeOut(progressBetween(progress, 0.5, 0.76));
-  const edgeMask = `linear-gradient(to bottom, #000 0%, #000 ${lerp(100, 70, edgeFadeProgress)}%, rgba(0,0,0,0) 100%)`;
+  const motion = getProjectMotion(index);
+  const sectionEnterProgress = easeSoft(progressBetween(progress, 0, 0.2));
+  const riseProgress = easeOut(progressBetween(progress, motion.riseStart, motion.riseEnd));
+  const exitProgress = easeInOut(progressBetween(progress, motion.exitStart, motion.exitEnd));
+  const exitFadeProgress = easeSoft(progressBetween(progress, motion.exitStart + 0.1, motion.exitEnd));
+  const galleryDrift = easeInOut(clamp(progress * motion.driftSpeed + motion.driftOffset));
+  const lift = lerp(motion.enterDistance + 6, 0, riseProgress) + lerp(0, motion.exitDistance, exitProgress);
+  const parallaxY = lerp(motion.driftStart + 8, motion.driftEnd - 10, galleryDrift);
+  const parallaxX =
+    Math.sin(progress * Math.PI * (1.18 + motion.driftSpeed * 0.22) + index * 0.6) *
+      (motion.xAmplitude + 0.12) +
+    lerp(0, motion.exitX, exitProgress);
+  const floatY =
+    Math.sin(progress * Math.PI * (2.9 + motion.driftSpeed) + index * 0.72) *
+    (motion.floatAmplitude + 0.8);
+  const opacity = sectionEnterProgress * (1 - exitFadeProgress) * (activeProject ? 0.42 : 0.7);
+  const scrollBlur = lerp(18, 0, sectionEnterProgress) + lerp(0, 22, exitProgress);
 
   return (
     <div
@@ -1012,8 +1191,8 @@ function DecorativeProjectCard({
         zIndex: 4 + index,
         opacity,
         transform: `translate3d(${parallaxX}vw, calc(${lift}vh + ${parallaxY + floatY}px), 0)`,
-        filter: activeProject ? 'blur(16px)' : 'blur(8px)',
-        transition: 'filter 280ms ease, opacity 260ms ease',
+        filter: `blur(${Math.max(scrollBlur, activeProject ? 10 : 0)}px)`,
+        transition: `filter 320ms ease, transform ${motion.transitionMs}ms cubic-bezier(0.22, 1, 0.36, 1), opacity ${motion.opacityMs}ms ease-out`,
       }}
       aria-hidden="true"
     >
@@ -1021,8 +1200,6 @@ function DecorativeProjectCard({
         className="relative h-full overflow-hidden bg-white shadow-[0_18px_60px_rgba(0,0,0,0.06)]"
         style={{
           filter: 'grayscale(1) contrast(0.8) brightness(1.08)',
-          WebkitMaskImage: edgeMask,
-          maskImage: edgeMask,
         }}
       >
         <ProjectPlaceholder project={project} index={index} />
