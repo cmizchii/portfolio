@@ -60,6 +60,8 @@ const CARD_H = 400;
 const TEXT_PAD_L = 22;
 const TEXT_PAD_T = 20;
 const LINE_COLOR = '#2a2a2a';
+const APPLE_FONT_STACK =
+  "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', Inter, system-ui, sans-serif";
 const BUMP_RADIUS = 130;
 const BUMP_STRENGTH = 32;
 const SCROLL_DISTANCE_VH = 286;
@@ -739,7 +741,7 @@ function HeroText({ progress, viewport }: { progress: number; viewport: Viewport
         top: viewport.height / 2 - CARD_H / 2 + TEXT_PAD_T,
         opacity: 1 - fadeProgress,
         transform: `translateY(${lerp(0, 8, fadeProgress)}px)`,
-        fontFamily: "Inter, system-ui, sans-serif",
+        fontFamily: APPLE_FONT_STACK,
       }}
     >
       <p>Have an idea?</p>
@@ -810,7 +812,7 @@ function SecondScreen({ progress }: { progress: number }) {
       </div>
       <h1
         className="max-w-[920px] text-center text-[44px] font-semibold leading-[1.18] tracking-[-0.015em] text-black"
-        style={{ fontFamily: "Inter, system-ui, sans-serif" }}
+        style={{ fontFamily: APPLE_FONT_STACK }}
       >
         Designing interfaces that feel
         <br />
@@ -933,7 +935,7 @@ function ProjectsSection() {
               <h2
                 className="text-[clamp(48px,7vw,82px)] font-medium leading-none tracking-[0]"
                 style={{
-                  fontFamily: "'Instrument Sans', Inter, system-ui, sans-serif",
+                  fontFamily: APPLE_FONT_STACK,
                 }}
               >
                 MY WORK
@@ -1075,10 +1077,10 @@ function AboutContent({ progress }: { progress: number }) {
   return (
     <div className="pointer-events-none absolute inset-0 z-50 px-5" aria-label="About">
       <div
-        className="absolute left-1/2 top-1/2 flex -translate-y-1/2 items-center gap-[0.22em] whitespace-nowrap text-[clamp(48px,7.4vw,120px)] font-black leading-none tracking-[0]"
+        className="absolute left-1/2 top-1/2 flex -translate-y-1/2 items-center gap-[0.22em] whitespace-nowrap text-[clamp(48px,7.4vw,120px)] font-medium leading-none tracking-[0]"
         aria-label="im shim, a designer who also codes"
         style={{
-          fontFamily: "Inter, system-ui, sans-serif",
+          fontFamily: APPLE_FONT_STACK,
           transform: `translate3d(calc(-50% + ${lerp(142, -78, horizontalProgress)}vw), calc(-50% - ${lerp(0, 35, verticalProgress)}vh), 0) rotate(${lerp(-1.8, 0.8, horizontalProgress)}deg)`,
           willChange: 'transform',
         }}
