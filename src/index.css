@@ -54,6 +54,322 @@
   }
 }
 
+@keyframes detailRise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+  }
+}
+
+@keyframes servicePanelFloat {
+  0% {
+    border-radius: 0 0 42px 42px;
+    transform: translate3d(0, -42px, 0) scale(1.035);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+  22% {
+    border-radius: 34px;
+    transform: translate3d(0, 0, 0) scale(1);
+    box-shadow: 0 26px 80px rgba(0, 0, 0, 0.045);
+  }
+  76% {
+    border-radius: 34px;
+    transform: translate3d(0, 0, 0) scale(1);
+    box-shadow: 0 26px 80px rgba(0, 0, 0, 0.045);
+  }
+  100% {
+    border-radius: 42px;
+    transform: translate3d(0, -46px, 0) scale(0.965);
+    box-shadow: 0 34px 90px rgba(0, 0, 0, 0.06);
+  }
+}
+
+@keyframes serviceCopyFloat {
+  0% {
+    opacity: 0.58;
+    transform: translate3d(0, 18px, 0);
+  }
+  20% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  82% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0.82;
+    transform: translate3d(0, -18px, 0);
+  }
+}
+
+@keyframes scrollCopyReveal {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 36px, 0) scale(0.985);
+  }
+  34% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  82% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    opacity: 0.82;
+    transform: translate3d(0, -16px, 0) scale(0.995);
+  }
+}
+
+@keyframes scrollListReveal {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 48px, 0);
+  }
+  42% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  82% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0.9;
+    transform: translate3d(0, -12px, 0);
+  }
+}
+
+@keyframes scrollRowReveal {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+  }
+  55% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.about-card-shell {
+  min-width: 0;
+}
+
+.about-capability-card {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  transition:
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.about-capability-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.about-card-shell:hover .about-capability-card {
+  transform: translate3d(0, -6px, 0);
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.1);
+}
+
+.about-card-shell:nth-child(even):hover .about-capability-card {
+  transform: translate3d(0, -5px, 0);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.09);
+}
+
+.about-card-shell:hover .about-capability-card::before {
+  opacity: 0;
+}
+
+.deferred-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 720px;
+}
+
+.service-transition-section {
+  background: #f5f5f7;
+}
+
+.service-page-shell {
+  transform-origin: center top;
+  will-change: transform, border-radius;
+}
+
+.service-copy {
+  will-change: opacity, transform;
+}
+
+.service-intro,
+.service-list,
+.reveal-copy,
+.reveal-list,
+.reveal-row {
+  will-change: opacity, transform;
+}
+
+@supports (animation-timeline: view()) {
+  .service-page-shell {
+    animation: servicePanelFloat linear both;
+    animation-timeline: view();
+    animation-range: entry -8% exit 108%;
+  }
+
+  .service-copy {
+    animation: serviceCopyFloat linear both;
+    animation-timeline: view();
+    animation-range: entry 0% exit 100%;
+  }
+
+  .service-intro {
+    animation: scrollCopyReveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 62%;
+  }
+
+  .service-list {
+    animation: scrollListReveal linear both;
+    animation-timeline: view();
+    animation-range: entry 6% cover 54%;
+  }
+
+  .service-list .service-row,
+  .reveal-list .reveal-row {
+    animation: scrollRowReveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 34%;
+  }
+
+  .service-list .service-row:nth-child(2),
+  .reveal-list .reveal-row:nth-child(2) {
+    animation-range: entry 0% cover 39%;
+  }
+
+  .service-list .service-row:nth-child(3),
+  .reveal-list .reveal-row:nth-child(3) {
+    animation-range: entry 0% cover 44%;
+  }
+
+  .service-list .service-row:nth-child(4),
+  .reveal-list .reveal-row:nth-child(4) {
+    animation-range: entry 0% cover 49%;
+  }
+
+  .service-list .service-row:nth-child(5),
+  .reveal-list .reveal-row:nth-child(5) {
+    animation-range: entry 0% cover 54%;
+  }
+
+  .reveal-section .reveal-copy {
+    animation: scrollCopyReveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 56%;
+  }
+
+  .reveal-section .reveal-list {
+    animation: scrollListReveal linear both;
+    animation-timeline: view();
+    animation-range: entry 8% cover 58%;
+  }
+}
+
+.service-detail {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translate3d(0, -4px, 0);
+  transition:
+    max-height 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 360ms ease,
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    margin-top 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.group:hover .service-detail,
+.group:focus-visible .service-detail {
+  max-height: 260px;
+  margin-top: 12px;
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.faq-answer-grid {
+  transition: grid-template-rows 680ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.faq-answer-copy {
+  transition:
+    opacity 360ms ease 90ms,
+    transform 620ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.faq-chevron {
+  transform: translate3d(0, 0, 0);
+}
+
+.faq-chevron-bar {
+  position: absolute;
+  top: 50%;
+  display: block;
+  width: 18px;
+  height: 3px;
+  border-radius: 999px;
+  background: currentColor;
+  transition:
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 260ms ease;
+  will-change: transform;
+}
+
+.faq-chevron-left {
+  left: 50%;
+  transform: translate3d(-78%, -50%, 0) rotate(45deg);
+}
+
+.faq-chevron-right {
+  left: 50%;
+  transform: translate3d(-22%, -50%, 0) rotate(-45deg);
+}
+
+.faq-chevron.is-open .faq-chevron-left {
+  transform: translate3d(-78%, -50%, 0) rotate(-45deg);
+}
+
+.faq-chevron.is-open .faq-chevron-right {
+  transform: translate3d(-22%, -50%, 0) rotate(45deg);
+}
+
+#contact input,
+#contact select,
+#contact textarea {
+  transition:
+    border-color 260ms ease,
+    background-color 260ms ease,
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#contact input:focus,
+#contact select:focus,
+#contact textarea:focus {
+  background: rgba(0, 0, 0, 0.025);
+  transform: translate3d(0, -2px, 0);
+}
+
 .float-tag {
   animation: float var(--dur, 5s) ease-in-out infinite;
   animation-delay: var(--delay, 0s);
