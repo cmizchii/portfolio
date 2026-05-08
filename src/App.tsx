@@ -236,27 +236,35 @@ const projectMotionProfiles: ProjectMotion[] = [
 const capabilityCards = [
   {
     eyebrow: 'Experience',
-    title: '3 years turning rough ideas into clear digital interfaces.',
-    text: 'From first flow to final screen, I keep structure, visuals, and interaction details connected.',
+    title: '3 years in, still obsessed.',
+    text: 'From first flow to final screen, I keep structure, visuals, and interaction details connected. Every project gets the same energy.',
     visual: '03',
+    visualColor: '#ff8862',
+    visualSize: 'clamp(50px,4.7vw,72px)',
   },
   {
     eyebrow: 'Availability',
-    title: 'Available worldwide for quietly ambitious web moments.',
-    text: 'Remote-friendly, flexible with teams, and comfortable moving between design and browser decisions.',
+    title: 'Worldwide. Async. Actually replies.',
+    text: "Remote-friendly and comfortable moving between design and browser decisions. Time zones haven't stopped me yet.",
     visual: '∞',
+    visualColor: '#b5e287',
+    visualSize: 'clamp(58px,5.2vw,78px)',
   },
   {
     eyebrow: 'Detail',
-    title: 'Pixel focused, but never only pixel focused.',
-    text: 'The tiny things matter because they change how the whole product feels: spacing, timing, hierarchy, and state.',
+    title: 'I notice before you say anything.',
+    text: "Spacing, timing, hierarchy, state - the tiny things no one names but everyone feels. That's where I spend the extra time.",
     visual: 'px',
+    visualColor: '#5dddc8',
+    visualSize: 'clamp(52px,4.9vw,74px)',
   },
   {
     eyebrow: 'Front-End Feel',
-    title: 'Designs with code close enough to keep things real.',
-    text: 'I think about responsiveness, hover states, motion, and component behavior before handoff gets messy.',
+    title: 'What you see is what gets built.',
+    text: 'I write the code too - so nothing gets watered down in handoff. Responsiveness, motion, and hover states are part of the design.',
     visual: '</>',
+    visualColor: '#bba0ff',
+    visualSize: 'clamp(46px,4.2vw,64px)',
   },
 ];
 const ABOUT_CARD_LAYOUTS = [
@@ -326,7 +334,7 @@ const questionItems = [
   {
     question: 'Do you just design, or can you build it too?',
     answer:
-      "Both - but with an honest caveat. I build real, functional websites, not just pretty mockups. Front-end is my strong suit: layouts, interactions, animations, the stuff users actually see and feel. For complex backend work like custom APIs or databases, you'd need someone else for that part.",
+      'Both. I design it and build it! What you see in Figma is what actually ends up in the browser.',
   },
   {
     question: 'How much does it cost?',
@@ -487,6 +495,14 @@ export default function App() {
   const cursorTagIdRef = useRef(0);
   const lastCursorTagRef = useRef({ x: -9999, y: -9999, time: 0 });
   const cursorTagTimeoutsRef = useRef<number[]>([]);
+
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, []);
 
   useEffect(() => {
     let measureFrame = 0;
@@ -1305,7 +1321,10 @@ function AboutContent({ progress }: { progress: number }) {
                   </h3>
                   <p className="mt-3 max-w-[240px] text-[14px] leading-[1.4] text-[#4f4f55]">{card.text}</p>
 
-                  <div className="absolute bottom-7 left-6 text-[clamp(50px,4.7vw,72px)] font-semibold leading-none tracking-[-0.04em] text-[#1d1d1f]">
+                  <div
+                    className="absolute bottom-7 left-6 font-semibold leading-none tracking-[-0.04em]"
+                    style={{ color: card.visualColor, fontSize: card.visualSize }}
+                  >
                     {card.visual}
                   </div>
                   <div className="absolute bottom-6 right-6 grid h-8 w-8 place-items-center rounded-full bg-[#1d1d1f] text-[21px] font-light leading-none text-white">
