@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import shimMemojiVideo from '../images/memoji.mov';
+import shimMemojiVideo from '../images/memoji.mp4';
 
 type Tag = { text: string; color: string; top: string; left: string };
 type Viewport = { width: number; height: number };
