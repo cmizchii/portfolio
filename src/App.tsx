@@ -728,7 +728,7 @@ export default function App() {
         className="relative bg-[#0c0c0c]"
         style={{ minHeight: `${SCROLL_DISTANCE_VH}vh` }}
       >
-        <div ref={rootRef} className="sticky top-0 h-screen w-full overflow-hidden bg-[#0c0c0c]">
+        <div ref={rootRef} className="sticky top-0 h-[100dvh] w-full overflow-hidden bg-[#0c0c0c] md:h-screen">
           <Lines progress={scrollProgress} viewport={viewport} />
 
           <Card progress={scrollProgress} viewport={viewport} />
@@ -1001,13 +1001,13 @@ function SecondScreen({ progress }: { progress: number }) {
       }}
     >
       <div
-        className="mb-7 inline-block bg-black px-3 py-[6px] text-[12px] font-bold uppercase tracking-[0.06em] text-white"
+        className="mb-7 inline-block bg-black px-3 py-[6px] text-[clamp(10.5px,2.6vw,12px)] font-bold uppercase tracking-[0.06em] text-white"
         style={{ fontFamily: "'Familjen Grotesk', Inter, system-ui, sans-serif" }}
       >
         UX/UI DESIGNER &amp; FRONT-END DEV
       </div>
       <h1
-        className="max-w-[920px] text-center text-[44px] font-semibold leading-[1.18] tracking-[-0.015em] text-black"
+        className="max-w-[920px] text-center text-[clamp(28px,7vw,44px)] font-semibold leading-[1.18] tracking-[-0.015em] text-black"
         style={{ fontFamily: APPLE_FONT_STACK }}
       >
         Designing interfaces that feel
@@ -1114,9 +1114,9 @@ function ProjectsSection() {
       className="relative bg-white text-black"
       aria-label="Selected projects and about"
     >
-      <div ref={projectStageRef} className="relative h-[460vh]">
+      <div ref={projectStageRef} className="relative h-[260vh] md:h-[460vh]">
         <div
-          className="sticky top-0 h-screen overflow-hidden"
+          className="sticky top-0 h-[100dvh] overflow-hidden md:h-screen"
           onMouseMove={(event) => updateActiveProject(event.clientX, event.clientY)}
           onMouseLeave={() => setActiveProject(null)}
         >
@@ -1182,8 +1182,8 @@ function ProjectsSection() {
 
       <div className="h-[21vh]" aria-hidden="true" />
 
-      <div ref={aboutStageRef} className="relative h-[500vh]">
-        <div className="sticky top-0 h-screen overflow-hidden">
+      <div ref={aboutStageRef} className="relative h-[300vh] md:h-[500vh]">
+        <div className="sticky top-0 h-[100dvh] overflow-hidden md:h-screen">
           <AboutContent progress={aboutProgress} />
         </div>
       </div>
@@ -1363,7 +1363,7 @@ function AboutContent({ progress }: { progress: number }) {
           willChange: 'opacity, transform',
         }}
       >
-        <div className="mx-auto flex max-w-[1080px] gap-4 overflow-visible pb-3 pt-8 md:grid md:grid-cols-4">
+        <div className="about-cards-scroller -mx-5 flex gap-4 overflow-x-auto overflow-y-visible px-5 pb-3 pt-8 md:mx-auto md:max-w-[1080px] md:grid md:grid-cols-4 md:overflow-visible md:px-0">
           {capabilityCards.map((card, index) => {
             const layout = ABOUT_CARD_LAYOUTS[index] ?? ABOUT_CARD_LAYOUTS[0];
             const cardProgress = easeOut(progressBetween(progress, 0.5 + index * 0.028, 0.82 + index * 0.02));
@@ -1433,6 +1433,7 @@ function AboutContent({ progress }: { progress: number }) {
 
 function PortfolioDetails() {
   const [openQuestion, setOpenQuestion] = useState(-1);
+  const [openService, setOpenService] = useState(-1);
 
   return (
     <>
@@ -1461,43 +1462,49 @@ function PortfolioDetails() {
             </div>
 
             <div className="service-list">
-              {serviceItems.map((item) => (
-                <div
-                  key={item.title}
-                  tabIndex={0}
-                  className="service-row group grid cursor-default gap-3 border-b border-black/12 py-5 outline-none transition duration-500 hover:translate-x-1.5 focus-visible:translate-x-1.5 md:grid-cols-[1fr_48px] md:items-start md:py-6"
-                >
-                  <div>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <h3
-                        className="text-[clamp(22.5px,2.16vw,30.6px)] font-medium leading-none tracking-[0] text-[#1d1d1f] transition group-hover:text-black"
-                        style={{ fontFamily: APPLE_FONT_STACK }}
-                      >
-                        {item.title}
-                      </h3>
-                      <span className="rounded-full border border-[#d6d6dc] px-3.5 py-1.5 text-[12.6px] font-semibold leading-none text-[#6e6e73]">
-                        {item.type}
-                      </span>
-                    </div>
-                    <div className="service-detail">
-                      <p className="max-w-[650px] text-[14px] leading-[1.45] text-black/58">
-                        {item.description}
-                      </p>
-                      <div className="mt-4 flex flex-wrap gap-2.5">
-                        {item.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="rounded-full border border-black/18 px-3 py-1 text-[12px] font-semibold leading-none text-black/50 transition group-hover:border-black/26 group-focus-visible:border-black/26"
-                          >
-                            {tag}
-                          </span>
-                        ))}
+              {serviceItems.map((item, serviceIndex) => {
+                const isOpen = openService === serviceIndex;
+
+                return (
+                  <button
+                    key={item.title}
+                    type="button"
+                    aria-expanded={isOpen}
+                    onClick={() => setOpenService(isOpen ? -1 : serviceIndex)}
+                    className={`service-row group grid w-full gap-3 border-b border-black/12 py-5 text-left outline-none transition duration-500 hover:translate-x-1.5 focus-visible:translate-x-1.5 md:grid-cols-[1fr_48px] md:items-start md:py-6 ${isOpen ? 'is-open' : ''}`}
+                  >
+                    <div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <h3
+                          className="text-[clamp(22.5px,2.16vw,30.6px)] font-medium leading-none tracking-[0] text-[#1d1d1f] transition group-hover:text-black"
+                          style={{ fontFamily: APPLE_FONT_STACK }}
+                        >
+                          {item.title}
+                        </h3>
+                        <span className="rounded-full border border-[#d6d6dc] px-3.5 py-1.5 text-[12.6px] font-semibold leading-none text-[#6e6e73]">
+                          {item.type}
+                        </span>
+                      </div>
+                      <div className="service-detail">
+                        <p className="max-w-[650px] text-[14px] leading-[1.45] text-black/58">
+                          {item.description}
+                        </p>
+                        <div className="mt-4 flex flex-wrap gap-2.5">
+                          {item.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-full border border-black/18 px-3 py-1 text-[12px] font-semibold leading-none text-black/50 transition group-hover:border-black/26 group-focus-visible:border-black/26"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="text-[15.3px] font-medium text-[#a1a1a6] md:text-right">{item.number}</div>
-                </div>
-              ))}
+                    <div className="text-[15.3px] font-medium text-[#a1a1a6] md:text-right">{item.number}</div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -1588,26 +1595,26 @@ function PortfolioDetails() {
             shimaa.j.nur@gmail.com
           </a>
 
-          <div className="mt-32 grid gap-x-12 gap-y-12 text-[14px] font-medium leading-[1.35] text-[#1d1d1f] sm:grid-cols-2 md:mt-44 lg:grid-cols-4">
+          <div className="mt-20 grid gap-x-12 gap-y-10 text-[15px] font-medium leading-[1.35] text-[#1d1d1f] sm:grid-cols-2 md:mt-44 lg:grid-cols-4">
             <div>
-              <p className="mb-6 text-[12px] font-semibold uppercase tracking-[0.14em] text-black/45">Phone</p>
-              <a className="transition hover:opacity-55" href="tel:+19402386273">
+              <p className="mb-4 text-[12px] font-semibold uppercase tracking-[0.14em] text-black/45">Phone</p>
+              <a className="inline-flex min-h-[44px] items-center transition hover:opacity-55" href="tel:+19402386273">
                 +1-940-238-6273
               </a>
             </div>
             <div>
-              <p className="mb-6 text-[12px] font-semibold uppercase tracking-[0.14em] text-black/45">Availability</p>
-              <p>Available worldwide</p>
+              <p className="mb-4 text-[12px] font-semibold uppercase tracking-[0.14em] text-black/45">Availability</p>
+              <p className="inline-flex min-h-[44px] items-center">Available worldwide</p>
             </div>
             <div>
-              <p className="mb-6 text-[12px] font-semibold uppercase tracking-[0.14em] text-black/45">GitHub</p>
-              <a className="transition hover:opacity-55" href="https://github.com/cmizchii" target="_blank" rel="noreferrer">
+              <p className="mb-4 text-[12px] font-semibold uppercase tracking-[0.14em] text-black/45">GitHub</p>
+              <a className="inline-flex min-h-[44px] items-center transition hover:opacity-55" href="https://github.com/cmizchii" target="_blank" rel="noreferrer">
                 @cmizchii
               </a>
             </div>
             <div>
-              <p className="mb-6 text-[12px] font-semibold uppercase tracking-[0.14em] text-black/45">Made</p>
-              <p>© 2026 Shaimaa Jamal</p>
+              <p className="mb-4 text-[12px] font-semibold uppercase tracking-[0.14em] text-black/45">Made</p>
+              <p className="inline-flex min-h-[44px] items-center">© 2026 Shaimaa Jamal</p>
             </div>
           </div>
         </div>

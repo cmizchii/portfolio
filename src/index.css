@@ -22,6 +22,27 @@
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    touch-action: manipulation;
+    overscroll-behavior-y: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @keyframes float {
@@ -555,6 +576,47 @@
     top 180ms linear,
     height 260ms ease,
     opacity 260ms ease;
+}
+
+@media (hover: none), (max-width: 767px) {
+  .scroll-cue {
+    display: none !important;
+  }
+
+  .cursor-tag-ink {
+    display: none !important;
+  }
+}
+
+.about-cards-scroller {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 1.25rem;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.about-cards-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.about-cards-scroller > .about-card-shell {
+  scroll-snap-align: start;
+}
+
+.service-row.is-open .service-detail {
+  max-height: 320px;
+  margin-top: 12px;
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (max-width: 767px) {
+  .project-card {
+    width: clamp(180px, 56vw, 260px) !important;
+    height: clamp(190px, 60vw, 280px) !important;
+  }
 }
 
 .footer-email-link {
