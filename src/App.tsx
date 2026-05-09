@@ -765,23 +765,10 @@ function ScrollCue({ visible, active, progress }: ScrollCueState) {
       }
       aria-hidden="true"
     >
-      <svg className="scroll-cue-copy" viewBox="0 0 120 120">
-        <defs>
-          <path
-            id="scrollCueCopyPath"
-            d="M60 60 m -42 0 a 42 42 0 1 1 84 0 a 42 42 0 1 1 -84 0"
-          />
-        </defs>
-        <text>
-          <textPath href="#scrollCueCopyPath" startOffset="0%">
-            Scroll Down * Scroll Down *
-          </textPath>
-        </text>
-      </svg>
-      <svg className="scroll-cue-arrow" viewBox="0 0 36 46">
-        <path d="M18 4V36" />
-        <path d="M7 25L18 36L29 25" />
-      </svg>
+      <span className="scroll-cue-mouse">
+        <span className="scroll-cue-progress" />
+        <span className="scroll-cue-dot" />
+      </span>
     </div>
   );
 }

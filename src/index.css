@@ -54,21 +54,30 @@
   }
 }
 
-@keyframes scrollCueOrbit {
-  0% {
-    transform: rotate(0deg);
+@keyframes scrollMouseNudge {
+  0%, 100% {
+    transform: translate3d(-50%, 0, 0);
   }
-  100% {
-    transform: rotate(360deg);
+  50% {
+    transform: translate3d(-50%, 6px, 0);
   }
 }
 
-@keyframes scrollCueNudge {
-  0%, 100% {
-    transform: translate3d(-50%, -50%, 0);
+@keyframes scrollMouseDot {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, 0, 0) scaleY(0.55);
   }
-  50% {
-    transform: translate3d(-50%, calc(-50% + 5px), 0);
+  18% {
+    opacity: 1;
+  }
+  78% {
+    opacity: 1;
+    transform: translate3d(-50%, 18px, 0) scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-50%, 24px, 0) scaleY(0.7);
   }
 }
 
@@ -448,13 +457,13 @@
   left: 50%;
   bottom: clamp(22px, 5vh, 48px);
   z-index: 120;
-  width: 92px;
-  height: 92px;
+  width: 64px;
+  height: 96px;
   color: #fff;
   mix-blend-mode: difference;
   opacity: 0;
   pointer-events: none;
-  transform: translate3d(-50%, 16px, 0) scale(0.9);
+  transform: translate3d(-50%, 16px, 0) scale(0.88);
   transition:
     opacity 420ms ease,
     transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -467,78 +476,85 @@
 }
 
 .scroll-cue.is-scrolling {
-  opacity: 0.72;
-  transform: translate3d(-50%, 0, 0) scale(0.96);
+  opacity: 0.78;
+  transform: translate3d(-50%, 0, 0) scale(0.94);
 }
 
-.scroll-cue::before,
-.scroll-cue::after {
-  content: '';
-  position: absolute;
-  border-radius: 999px;
-  pointer-events: none;
-}
-
-.scroll-cue::before {
-  inset: 15px;
-  border: 1px solid currentColor;
-  opacity: 0.22;
-}
-
-.scroll-cue::after {
-  inset: 4px;
-  background: conic-gradient(currentColor calc(var(--scroll-progress) * 1turn), transparent 0);
-  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
-  opacity: 0.32;
-  transform: rotate(-90deg);
-}
-
-.scroll-cue-copy {
-  position: absolute;
-  inset: 0;
-  display: block;
-  overflow: visible;
-  fill: currentColor;
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  animation: scrollCueOrbit 12s linear infinite;
-  transform-origin: 50% 50%;
-  will-change: transform;
-}
-
-.scroll-cue.is-scrolling .scroll-cue-copy {
-  animation-duration: 4.8s;
-}
-
-.scroll-cue-arrow {
+.scroll-cue-mouse {
   position: absolute;
   left: 50%;
-  top: 50%;
-  width: 34px;
-  height: 44px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 3;
-  transform: translate3d(-50%, -50%, 0);
+  top: 9px;
+  display: block;
+  width: 38px;
+  height: 62px;
+  overflow: hidden;
+  border: 2.5px solid currentColor;
+  border-radius: 999px;
+  opacity: 0.82;
+  transform: translate3d(-50%, 0, 0);
   transition:
+    border-width 260ms ease,
     opacity 260ms ease,
-    stroke-width 260ms ease;
-  will-change: transform;
+    transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    height 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: scrollMouseNudge 1.75s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+  will-change: transform, height;
 }
 
-.scroll-cue:not(.is-scrolling) .scroll-cue-arrow {
-  animation: scrollCueNudge 1.85s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+.scroll-cue-progress {
+  position: absolute;
+  inset: 5px;
+  display: block;
+  overflow: hidden;
+  border-radius: inherit;
+  opacity: 0.18;
 }
 
-.scroll-cue.is-scrolling .scroll-cue-arrow {
-  opacity: 0.74;
-  stroke-width: 3.4;
-  transform: translate3d(-50%, calc(-50% + 6px), 0) scaleY(1.08);
+.scroll-cue-progress::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: calc(var(--scroll-progress) * 100%);
+  min-height: 8px;
+  border-radius: inherit;
+  background: currentColor;
+  transform-origin: top;
+  transition: height 180ms linear;
+}
+
+.scroll-cue-dot {
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  display: block;
+  width: 4px;
+  height: 12px;
+  border-radius: 999px;
+  background: currentColor;
+  transform: translate3d(-50%, 0, 0);
+  animation: scrollMouseDot 1.75s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
+}
+
+.scroll-cue.is-scrolling .scroll-cue-mouse {
+  height: 66px;
+  border-width: 3px;
+  opacity: 0.9;
+  transform: translate3d(-50%, 4px, 0) scaleY(1.04);
+  animation-play-state: paused;
+}
+
+.scroll-cue.is-scrolling .scroll-cue-dot {
+  top: calc(11px + (var(--scroll-progress) * 32px));
+  height: 15px;
+  opacity: 0.92;
+  animation: none;
+  transition:
+    top 180ms linear,
+    height 260ms ease,
+    opacity 260ms ease;
 }
 
 .footer-email-link {
