@@ -348,8 +348,7 @@ const questionItems = [
   },
 ];
 const contactLinks = [
-  { label: 'Email', href: 'mailto:hello@shim.design' },
-  { label: 'GitHub', href: 'https://github.com/cmizchii' },
+  { label: 'Call', href: 'tel:+19402386273' },
 ];
 const contactServices = ['Website', 'Product UI', 'Prototype', 'Design System'];
 
@@ -687,6 +686,7 @@ export default function App() {
           <HeroText progress={scrollProgress} viewport={viewport} />
 
           <SecondScreen progress={scrollProgress} />
+          <InitialScrollHint progress={scrollProgress} />
           <CursorTagTrail points={cursorTags} progress={scrollProgress} />
 
           {tags.map((tag, i) => (
@@ -739,6 +739,26 @@ function CursorTagTrail({ points, progress }: { points: CursorTag[]; progress: n
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function InitialScrollHint({ progress }: { progress: number }) {
+  const exitProgress = easeOut(progressBetween(progress, 0.01, 0.1));
+  const opacity = 1 - exitProgress;
+
+  return (
+    <div
+      className="initial-scroll-hint pointer-events-none absolute bottom-8 left-1/2 z-[72] -translate-x-1/2 text-white md:bottom-10"
+      style={{
+        opacity,
+        transform: `translate3d(-50%, ${lerp(0, 12, exitProgress)}px, 0)`,
+        willChange: 'opacity, transform',
+      }}
+      aria-hidden="true"
+    >
+      <span>Scroll</span>
+      <span className="initial-scroll-hint-line" />
     </div>
   );
 }
@@ -916,6 +936,7 @@ function SecondScreen({ progress }: { progress: number }) {
   const blurProgress = easeOut(progressBetween(progress, SECOND_APPEAR_START, SECOND_BLUR_END));
   const exitProgress = easeSoft(progressBetween(progress, SECOND_EXIT_START, SECOND_EXIT_END));
   const exitBlurProgress = easeSoft(progressBetween(progress, SECOND_EXIT_BLUR_START, SECOND_EXIT_END));
+
   return (
     <div
       className="pointer-events-none absolute inset-0 z-40 flex flex-col items-center justify-center px-6"
@@ -1013,6 +1034,14 @@ function ProjectsSection() {
 
     section.querySelectorAll<HTMLElement>('.project-card').forEach((card) => {
       const rect = card.getBoundingClientRect();
+      const isHovered =
+        clientX >= rect.left &&
+        clientX <= rect.right &&
+        clientY >= rect.top &&
+        clientY <= rect.bottom;
+
+      if (!isHovered) return;
+
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
       const distance = Math.hypot(clientX - centerX, clientY - centerY);
@@ -1023,7 +1052,7 @@ function ProjectsSection() {
       }
     });
 
-    setActiveProject(closestDistance < 280 ? closestProject : null);
+    setActiveProject(closestProject);
   };
 
   return (
@@ -1343,6 +1372,7 @@ function AboutContent({ progress }: { progress: number }) {
 
 function PortfolioDetails() {
   const [openQuestion, setOpenQuestion] = useState(-1);
+  const [contactIsExcited, setContactIsExcited] = useState(false);
 
   return (
     <>
@@ -1370,7 +1400,7 @@ function PortfolioDetails() {
               </p>
             </div>
 
-            <div className="service-list border-t border-black/12">
+            <div className="service-list">
               {serviceItems.map((item) => (
                 <div
                   key={item.title}
@@ -1481,16 +1511,16 @@ function PortfolioDetails() {
         </div>
       </section>
 
-      <section id="contact" className="deferred-section reveal-section relative bg-white px-5 pb-14 pt-24 text-black md:px-10 md:pb-20 md:pt-[154px]" aria-label="Contact">
+      <section id="contact" className="deferred-section reveal-section relative bg-white px-5 pb-14 pt-[150px] text-black md:px-10 md:pb-20 md:pt-[241px]" aria-label="Contact">
         <div className="mx-auto max-w-[1080px]">
           <h2
-            className="reveal-copy text-[clamp(42px,7.6vw,96px)] font-semibold leading-[0.92] tracking-[-0.02em]"
+            className="reveal-copy text-[clamp(46px,6vw,82px)] font-semibold leading-[1.02] tracking-[0]"
             style={{ fontFamily: APPLE_FONT_STACK }}
           >
-            Contact me
+            Let&apos;s talk ! {contactIsExcited ? ':D' : ':)'}
           </h2>
 
-          <div className="mt-10 grid gap-10 md:grid-cols-[0.72fr_1.28fr] md:gap-14">
+          <div className="mt-[59px] grid gap-10 md:grid-cols-[0.72fr_1.28fr] md:gap-14">
             <div className="reveal-copy space-y-7 text-[13px] font-medium leading-[1.35] text-[#333]">
               <div>
                 <p>Worldwide</p>
@@ -1507,7 +1537,15 @@ function PortfolioDetails() {
               </div>
             </div>
 
-            <form className="reveal-list space-y-6" action="mailto:hello@shim.design" method="post">
+            <form
+              className="reveal-list space-y-6"
+              action="mailto:shimaa.j.nur@gmail.com"
+              method="post"
+              onMouseEnter={() => setContactIsExcited(true)}
+              onMouseLeave={() => setContactIsExcited(false)}
+              onFocus={() => setContactIsExcited(true)}
+              onBlur={() => setContactIsExcited(false)}
+            >
               <div className="reveal-row">
                 <label className="block text-[14px] font-semibold text-[#333]" htmlFor="contact-name">
                   Name
@@ -1572,8 +1610,15 @@ function PortfolioDetails() {
           </div>
 
           <div className="mt-14 grid gap-7 text-[clamp(22px,2.6vw,34px)] font-semibold leading-none tracking-[0] md:grid-cols-2">
-            <a href="mailto:hello@shim.design" className="transition hover:opacity-55">
-              hello@shim.design
+            <a
+              href="mailto:shimaa.j.nur@gmail.com"
+              className="transition hover:opacity-55"
+              onMouseEnter={() => setContactIsExcited(true)}
+              onMouseLeave={() => setContactIsExcited(false)}
+              onFocus={() => setContactIsExcited(true)}
+              onBlur={() => setContactIsExcited(false)}
+            >
+              shimaa.j.nur@gmail.com
             </a>
             <div className="md:text-right">
               {contactLinks.map((link) => (
@@ -1583,6 +1628,10 @@ function PortfolioDetails() {
                   target={link.href.startsWith('http') ? '_blank' : undefined}
                   rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
                   className="ml-6 text-[16px] font-medium underline decoration-black/30 underline-offset-4 transition hover:decoration-black first:ml-0"
+                  onMouseEnter={() => setContactIsExcited(true)}
+                  onMouseLeave={() => setContactIsExcited(false)}
+                  onFocus={() => setContactIsExcited(true)}
+                  onBlur={() => setContactIsExcited(false)}
                 >
                   {link.label}
                 </a>
@@ -1636,6 +1685,10 @@ function ProjectCard({
   const opacity = sectionEnterProgress * (1 - exitFadeProgress);
   const scrollBlur = lerp(9, 0, sectionEnterProgress) + lerp(0, 8, exitProgress);
   const visibleBlur = Math.max(scrollBlur, isDimmed ? 4 : 0);
+  const blurFilter = visibleBlur > 0.15 ? `blur(${visibleBlur}px) ` : '';
+  const colorFilter = isActive
+    ? 'grayscale(0) saturate(1.05)'
+    : 'grayscale(1) saturate(0.08) contrast(1.04)';
   const focusScale = isActive ? 1.045 : 1;
   const distanceFromActive = activeIndex >= 0 ? Math.abs(index - activeIndex) : 0;
   const activeShiftX = isActive ? project.focusOffset?.xVw ?? 0 : 0;
@@ -1651,6 +1704,8 @@ function ProjectCard({
     <article
       tabIndex={0}
       data-project-id={project.id}
+      onMouseEnter={() => onFocusProject(project.id)}
+      onMouseLeave={() => onFocusProject(null)}
       onFocus={() => onFocusProject(project.id)}
       onBlur={() => onFocusProject(null)}
       className="project-card absolute outline-none"
@@ -1660,8 +1715,8 @@ function ProjectCard({
         opacity,
         transform: `translate3d(calc(${parallaxX}vw + ${proximityShiftX + activeShiftX}vw), calc(${lift + activeShiftY}vh + ${parallaxY + proximityShiftY + floatY}px), 0) scale(${focusScale})`,
         transition:
-          `filter 520ms cubic-bezier(0.22, 1, 0.36, 1), transform ${motion.transitionMs}ms cubic-bezier(0.22, 1, 0.36, 1), opacity ${motion.opacityMs}ms ease-out`,
-        filter: visibleBlur > 0.15 ? `blur(${visibleBlur}px)` : undefined,
+          `filter 620ms cubic-bezier(0.22, 1, 0.36, 1), transform ${motion.transitionMs}ms cubic-bezier(0.22, 1, 0.36, 1), opacity ${motion.opacityMs}ms ease-out`,
+        filter: `${blurFilter}${colorFilter}`,
       }}
     >
       <div
@@ -1727,6 +1782,8 @@ function DecorativeProjectCard({
   const opacity = sectionEnterProgress * (1 - exitFadeProgress) * (activeProject ? 0.42 : 0.7);
   const scrollBlur = lerp(9, 0, sectionEnterProgress) + lerp(0, 8, exitProgress);
   const visibleBlur = Math.max(scrollBlur, activeProject ? 4 : 0);
+  const blurFilter = visibleBlur > 0.15 ? `blur(${visibleBlur}px) ` : '';
+  const colorFilter = 'grayscale(1) saturate(0.08) contrast(1.04)';
 
   return (
     <div
@@ -1736,8 +1793,8 @@ function DecorativeProjectCard({
         zIndex: 4 + index,
         opacity,
         transform: `translate3d(${parallaxX}vw, calc(${lift}vh + ${parallaxY + floatY}px), 0)`,
-        filter: visibleBlur > 0.15 ? `blur(${visibleBlur}px)` : undefined,
-        transition: `filter 320ms ease, transform ${motion.transitionMs}ms cubic-bezier(0.22, 1, 0.36, 1), opacity ${motion.opacityMs}ms ease-out`,
+        filter: `${blurFilter}${colorFilter}`,
+        transition: `filter 520ms ease, transform ${motion.transitionMs}ms cubic-bezier(0.22, 1, 0.36, 1), opacity ${motion.opacityMs}ms ease-out`,
       }}
       aria-hidden="true"
     >
