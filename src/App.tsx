@@ -4,6 +4,7 @@ import shimMemojiVideo from '../images/memoji.mp4';
 type Tag = { text: string; color: string; top: string; left: string };
 type Viewport = { width: number; height: number };
 type CursorTag = { id: number; x: number; y: number; tagIndex: number; rotation: number };
+type ScrollCueState = { visible: boolean; active: boolean; progress: number };
 type Project = {
   id: string;
   title: string;
@@ -347,11 +348,6 @@ const questionItems = [
       "That's what revisions are for. Push back early, not politely later. Honest feedback = better work. Always.",
   },
 ];
-const contactLinks = [
-  { label: 'Call', href: 'tel:+19402386273' },
-];
-const contactServices = ['Website', 'Product UI', 'Prototype', 'Design System'];
-
 const projects: Project[] = [
   {
     id: '01',
@@ -486,6 +482,11 @@ export default function App() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [viewport, setViewport] = useState<Viewport>(() => getViewport());
   const [cursorTags, setCursorTags] = useState<CursorTag[]>([]);
+  const [scrollCue, setScrollCue] = useState<ScrollCueState>({
+    visible: true,
+    active: false,
+    progress: 0,
+  });
   const scrollRef = useRef<HTMLElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollProgressRef = useRef(0);
@@ -501,6 +502,59 @@ export default function App() {
     }
 
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, []);
+
+  useEffect(() => {
+    let frame = 0;
+    let idleTimeout = 0;
+
+    const getPageProgress = () => {
+      const scrollMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      return clamp(window.scrollY / scrollMax);
+    };
+
+    const updateCue = (active: boolean) => {
+      frame = 0;
+      const scrollMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const progress = getPageProgress();
+      const visible = scrollMax > 80 && window.scrollY < scrollMax - 96;
+
+      setScrollCue((current) => {
+        if (
+          current.visible === visible &&
+          current.active === active &&
+          Math.abs(current.progress - progress) < 0.002
+        ) {
+          return current;
+        }
+
+        return { visible, active, progress };
+      });
+    };
+
+    const requestCueUpdate = (active: boolean) => {
+      if (frame) cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => updateCue(active));
+    };
+
+    const onScroll = () => {
+      requestCueUpdate(true);
+      window.clearTimeout(idleTimeout);
+      idleTimeout = window.setTimeout(() => updateCue(false), 620);
+    };
+
+    const onResize = () => requestCueUpdate(false);
+
+    updateCue(false);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onResize);
+      window.clearTimeout(idleTimeout);
+      cancelAnimationFrame(frame);
+    };
   }, []);
 
   useEffect(() => {
@@ -686,7 +740,6 @@ export default function App() {
           <HeroText progress={scrollProgress} viewport={viewport} />
 
           <SecondScreen progress={scrollProgress} />
-          <InitialScrollHint progress={scrollProgress} />
           <CursorTagTrail points={cursorTags} progress={scrollProgress} />
 
           {tags.map((tag, i) => (
@@ -696,7 +749,40 @@ export default function App() {
       </main>
 
       <ProjectsSection />
+      <ScrollCue {...scrollCue} />
     </>
+  );
+}
+
+function ScrollCue({ visible, active, progress }: ScrollCueState) {
+  return (
+    <div
+      className={`scroll-cue ${visible ? 'is-visible' : ''} ${active ? 'is-scrolling' : ''}`}
+      style={
+        {
+          '--scroll-progress': progress,
+        } as React.CSSProperties
+      }
+      aria-hidden="true"
+    >
+      <svg className="scroll-cue-copy" viewBox="0 0 120 120">
+        <defs>
+          <path
+            id="scrollCueCopyPath"
+            d="M60 60 m -42 0 a 42 42 0 1 1 84 0 a 42 42 0 1 1 -84 0"
+          />
+        </defs>
+        <text>
+          <textPath href="#scrollCueCopyPath" startOffset="0%">
+            Scroll Down * Scroll Down *
+          </textPath>
+        </text>
+      </svg>
+      <svg className="scroll-cue-arrow" viewBox="0 0 36 46">
+        <path d="M18 4V36" />
+        <path d="M7 25L18 36L29 25" />
+      </svg>
+    </div>
   );
 }
 
@@ -739,26 +825,6 @@ function CursorTagTrail({ points, progress }: { points: CursorTag[]; progress: n
           </div>
         );
       })}
-    </div>
-  );
-}
-
-function InitialScrollHint({ progress }: { progress: number }) {
-  const exitProgress = easeOut(progressBetween(progress, 0.01, 0.1));
-  const opacity = 1 - exitProgress;
-
-  return (
-    <div
-      className="initial-scroll-hint pointer-events-none absolute bottom-8 left-1/2 z-[72] -translate-x-1/2 text-white md:bottom-10"
-      style={{
-        opacity,
-        transform: `translate3d(-50%, ${lerp(0, 12, exitProgress)}px, 0)`,
-        willChange: 'opacity, transform',
-      }}
-      aria-hidden="true"
-    >
-      <span>Scroll</span>
-      <span className="initial-scroll-hint-line" />
     </div>
   );
 }
@@ -1351,13 +1417,21 @@ function AboutContent({ progress }: { progress: number }) {
                   <p className="mt-3 max-w-[240px] text-[14px] leading-[1.4] text-[#4f4f55]">{card.text}</p>
 
                   <div
-                    className="absolute bottom-7 left-6 font-semibold leading-none tracking-[-0.04em]"
-                    style={{ color: card.visualColor, fontSize: card.visualSize }}
+                    className="about-card-symbol absolute bottom-7 left-6 font-semibold leading-none tracking-[-0.04em]"
+                    style={
+                      {
+                        fontSize: card.visualSize,
+                        '--symbol-gradient-start': `${index * 18}%`,
+                        '--symbol-gradient-end': `${index * 18 + 38}%`,
+                        '--symbol-gradient-delay': `${index * -1.35}s`,
+                      } as React.CSSProperties
+                    }
                   >
                     {card.visual}
                   </div>
-                  <div className="absolute bottom-6 right-6 grid h-8 w-8 place-items-center rounded-full bg-[#1d1d1f] text-[21px] font-light leading-none text-white">
-                    +
+                  <div className="about-card-plus absolute bottom-6 right-6 rounded-full bg-[#1d1d1f] text-white" aria-hidden="true">
+                    <span />
+                    <span />
                   </div>
                 </article>
               </div>
@@ -1372,7 +1446,6 @@ function AboutContent({ progress }: { progress: number }) {
 
 function PortfolioDetails() {
   const [openQuestion, setOpenQuestion] = useState(-1);
-  const [contactIsExcited, setContactIsExcited] = useState(false);
 
   return (
     <>
@@ -1511,140 +1584,45 @@ function PortfolioDetails() {
         </div>
       </section>
 
-      <section id="contact" className="deferred-section reveal-section relative bg-white px-5 pb-14 pt-[150px] text-black md:px-10 md:pb-20 md:pt-[241px]" aria-label="Contact">
-        <div className="mx-auto max-w-[1080px]">
+      <footer id="contact" className="deferred-section bg-white px-5 pb-16 pt-28 text-black md:px-10 md:pb-24 md:pt-32" aria-label="Footer contact">
+        <div className="mx-auto max-w-[1180px]">
           <h2
-            className="reveal-copy text-[clamp(46px,6vw,82px)] font-semibold leading-[1.02] tracking-[0]"
+            className="text-[clamp(54px,10vw,142px)] font-semibold uppercase leading-[0.88] tracking-[0]"
             style={{ fontFamily: APPLE_FONT_STACK }}
           >
-            Let&apos;s talk ! {contactIsExcited ? ':D' : ':)'}
+            Get in touch
           </h2>
 
-          <div className="mt-[59px] grid gap-10 md:grid-cols-[0.72fr_1.28fr] md:gap-14">
-            <div className="reveal-copy space-y-7 text-[13px] font-medium leading-[1.35] text-[#333]">
-              <div>
-                <p>Worldwide</p>
-                <p>Available for remote projects</p>
-              </div>
-              <div>
-                <p>Office hours</p>
-                <p>Monday - Friday</p>
-                <p>11 AM - 6 PM</p>
-              </div>
-              <div>
-                <p>Best for</p>
-                <p>Product UI, portfolios, prototypes</p>
-              </div>
+          <a
+            href="mailto:shimaa.j.nur@gmail.com"
+            className="footer-email-link mt-12 inline-block border-b border-current pb-2 text-[clamp(26px,4.2vw,54px)] font-medium leading-none tracking-[0] md:mt-16"
+            style={{ fontFamily: APPLE_FONT_STACK }}
+          >
+            shimaa.j.nur@gmail.com
+          </a>
+
+          <div className="mt-32 grid gap-x-12 gap-y-12 text-[14px] font-medium leading-[1.35] text-[#1d1d1f] sm:grid-cols-2 md:mt-44 lg:grid-cols-4">
+            <div>
+              <p className="mb-6 text-[12px] font-semibold uppercase tracking-[0.14em] text-black/45">Phone</p>
+              <a className="transition hover:opacity-55" href="tel:+19402386273">
+                +1-940-238-6273
+              </a>
             </div>
-
-            <form
-              className="reveal-list space-y-6"
-              action="mailto:shimaa.j.nur@gmail.com"
-              method="post"
-              onMouseEnter={() => setContactIsExcited(true)}
-              onMouseLeave={() => setContactIsExcited(false)}
-              onFocus={() => setContactIsExcited(true)}
-              onBlur={() => setContactIsExcited(false)}
-            >
-              <div className="reveal-row">
-                <label className="block text-[14px] font-semibold text-[#333]" htmlFor="contact-name">
-                  Name
-                </label>
-                <input
-                  id="contact-name"
-                  name="name"
-                  className="mt-2 w-full border-0 border-b border-black/35 bg-transparent py-2.5 text-[15px] outline-none transition focus:border-black"
-                  placeholder="First and last name"
-                />
-              </div>
-
-              <div className="reveal-row">
-                <label className="block text-[14px] font-semibold text-[#333]" htmlFor="contact-service">
-                  Service
-                </label>
-                <select
-                  id="contact-service"
-                  name="service"
-                  className="mt-2 w-full border-0 border-b border-black/35 bg-transparent py-2.5 text-[15px] outline-none transition focus:border-black"
-                >
-                  {contactServices.map((service) => (
-                    <option key={service}>{service}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="reveal-row">
-                <label className="block text-[14px] font-semibold text-[#333]" htmlFor="contact-email">
-                  Email
-                </label>
-                <input
-                  id="contact-email"
-                  name="email"
-                  type="email"
-                  className="mt-2 w-full border-0 border-b border-black/35 bg-transparent py-2.5 text-[15px] outline-none transition focus:border-black"
-                  placeholder="you@email.com"
-                />
-              </div>
-
-              <div className="reveal-row">
-                <label className="block text-[14px] font-semibold text-[#333]" htmlFor="contact-project">
-                  Project description
-                </label>
-                <textarea
-                  id="contact-project"
-                  name="project"
-                  rows={3}
-                  className="mt-2 w-full resize-none border-0 border-b border-black/35 bg-transparent py-2.5 text-[15px] outline-none transition focus:border-black"
-                  placeholder="What are we making?"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="reveal-row min-h-[42px] rounded-full bg-[#0c0c0c] px-6 text-[14px] font-semibold text-white transition duration-300 hover:scale-[1.02] hover:bg-black"
-                style={{ fontFamily: APPLE_FONT_STACK }}
-              >
-                Submit
-              </button>
-            </form>
-          </div>
-
-          <div className="mt-14 grid gap-7 text-[clamp(22px,2.6vw,34px)] font-semibold leading-none tracking-[0] md:grid-cols-2">
-            <a
-              href="mailto:shimaa.j.nur@gmail.com"
-              className="transition hover:opacity-55"
-              onMouseEnter={() => setContactIsExcited(true)}
-              onMouseLeave={() => setContactIsExcited(false)}
-              onFocus={() => setContactIsExcited(true)}
-              onBlur={() => setContactIsExcited(false)}
-            >
-              shimaa.j.nur@gmail.com
-            </a>
-            <div className="md:text-right">
-              {contactLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  target={link.href.startsWith('http') ? '_blank' : undefined}
-                  rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
-                  className="ml-6 text-[16px] font-medium underline decoration-black/30 underline-offset-4 transition hover:decoration-black first:ml-0"
-                  onMouseEnter={() => setContactIsExcited(true)}
-                  onMouseLeave={() => setContactIsExcited(false)}
-                  onFocus={() => setContactIsExcited(true)}
-                  onBlur={() => setContactIsExcited(false)}
-                >
-                  {link.label}
-                </a>
-              ))}
+            <div>
+              <p className="mb-6 text-[12px] font-semibold uppercase tracking-[0.14em] text-black/45">Availability</p>
+              <p>Available worldwide</p>
+            </div>
+            <div>
+              <p className="mb-6 text-[12px] font-semibold uppercase tracking-[0.14em] text-black/45">GitHub</p>
+              <a className="transition hover:opacity-55" href="https://github.com/cmizchii" target="_blank" rel="noreferrer">
+                @cmizchii
+              </a>
+            </div>
+            <div>
+              <p className="mb-6 text-[12px] font-semibold uppercase tracking-[0.14em] text-black/45">Made</p>
+              <p>© 2026 Shaimaa Jamal</p>
             </div>
           </div>
-        </div>
-      </section>
-
-      <footer className="deferred-section border-t border-black/10 bg-white px-5 py-8 text-black md:px-10">
-        <div className="mx-auto flex max-w-[1180px] flex-col gap-4 text-[13px] text-black/45 md:flex-row md:items-center md:justify-between">
-          <p>Shim Portfolio</p>
-          <p>UX/UI design, front-end thinking, and intentional interfaces.</p>
         </div>
       </footer>
     </>

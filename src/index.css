@@ -54,6 +54,24 @@
   }
 }
 
+@keyframes scrollCueOrbit {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes scrollCueNudge {
+  0%, 100% {
+    transform: translate3d(-50%, -50%, 0);
+  }
+  50% {
+    transform: translate3d(-50%, calc(-50% + 5px), 0);
+  }
+}
+
 @keyframes detailRise {
   0% {
     opacity: 0;
@@ -162,17 +180,12 @@
   }
 }
 
-@keyframes scrollHintLine {
-  0% {
-    transform: translate3d(0, -4px, 0) scaleY(0.2);
-    opacity: 0;
+@keyframes symbolGradientDrift {
+  0%, 100% {
+    background-position: var(--symbol-gradient-start, 0%) 50%;
   }
-  35% {
-    opacity: 1;
-  }
-  100% {
-    transform: translate3d(0, 12px, 0) scaleY(1);
-    opacity: 0;
+  50% {
+    background-position: var(--symbol-gradient-end, 38%) 50%;
   }
 }
 
@@ -208,6 +221,55 @@
 
 .about-card-shell:hover .about-capability-card::before {
   opacity: 0;
+}
+
+.about-card-symbol {
+  color: transparent;
+  background:
+    linear-gradient(
+      96deg,
+      #bfe268 0%,
+      #ace8a8 10%,
+      #82dfcf 22%,
+      #8fd2f2 34%,
+      #b9a4ff 48%,
+      #d7a2ff 58%,
+      #ee9bcc 70%,
+      #f1b59a 82%,
+      #f4c9a6 90%,
+      #c2ee76 100%
+    );
+  background-size: 720% 100%;
+  background-position: var(--symbol-gradient-start, 0%) 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: symbolGradientDrift 13s ease-in-out infinite;
+  animation-delay: var(--symbol-gradient-delay, 0s);
+}
+
+.about-card-plus {
+  width: 32px;
+  height: 32px;
+}
+
+.about-card-plus span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  border-radius: 999px;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+}
+
+.about-card-plus span:first-child {
+  width: 13px;
+  height: 2px;
+}
+
+.about-card-plus span:last-child {
+  width: 2px;
+  height: 13px;
 }
 
 .deferred-section {
@@ -368,22 +430,6 @@
   transform: translate3d(-22%, -50%, 0) rotate(45deg);
 }
 
-#contact input,
-#contact select,
-#contact textarea {
-  transition:
-    border-color 260ms ease,
-    background-color 260ms ease,
-    transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-#contact input:focus,
-#contact select:focus,
-#contact textarea:focus {
-  background: rgba(0, 0, 0, 0.025);
-  transform: translate3d(0, -2px, 0);
-}
-
 .float-tag {
   animation: float var(--dur, 5s) ease-in-out infinite;
   animation-delay: var(--delay, 0s);
@@ -396,37 +442,132 @@
   will-change: transform, opacity, filter;
 }
 
-.initial-scroll-hint {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Inter, system-ui, sans-serif;
-  font-size: 12px;
-  font-weight: 650;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.scroll-cue {
+  --scroll-progress: 0;
+  position: fixed;
+  left: 50%;
+  bottom: clamp(22px, 5vh, 48px);
+  z-index: 120;
+  width: 92px;
+  height: 92px;
+  color: #fff;
+  mix-blend-mode: difference;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(-50%, 16px, 0) scale(0.9);
+  transition:
+    opacity 420ms ease,
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
 }
 
-.initial-scroll-hint-line {
-  position: relative;
-  display: block;
-  width: 1px;
-  height: 28px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.24);
+.scroll-cue.is-visible {
+  opacity: 0.9;
+  transform: translate3d(-50%, 0, 0) scale(1);
 }
 
-.initial-scroll-hint-line::after {
+.scroll-cue.is-scrolling {
+  opacity: 0.72;
+  transform: translate3d(-50%, 0, 0) scale(0.96);
+}
+
+.scroll-cue::before,
+.scroll-cue::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background: #ffffff;
-  transform-origin: top;
-  animation: scrollHintLine 1.45s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  border-radius: 999px;
+  pointer-events: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .initial-scroll-hint-line::after {
-    animation: none;
-  }
+.scroll-cue::before {
+  inset: 15px;
+  border: 1px solid currentColor;
+  opacity: 0.22;
+}
+
+.scroll-cue::after {
+  inset: 4px;
+  background: conic-gradient(currentColor calc(var(--scroll-progress) * 1turn), transparent 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1px));
+  opacity: 0.32;
+  transform: rotate(-90deg);
+}
+
+.scroll-cue-copy {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: visible;
+  fill: currentColor;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  animation: scrollCueOrbit 12s linear infinite;
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
+.scroll-cue.is-scrolling .scroll-cue-copy {
+  animation-duration: 4.8s;
+}
+
+.scroll-cue-arrow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 34px;
+  height: 44px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+  transform: translate3d(-50%, -50%, 0);
+  transition:
+    opacity 260ms ease,
+    stroke-width 260ms ease;
+  will-change: transform;
+}
+
+.scroll-cue:not(.is-scrolling) .scroll-cue-arrow {
+  animation: scrollCueNudge 1.85s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+
+.scroll-cue.is-scrolling .scroll-cue-arrow {
+  opacity: 0.74;
+  stroke-width: 3.4;
+  transform: translate3d(-50%, calc(-50% + 6px), 0) scaleY(1.08);
+}
+
+.footer-email-link {
+  background:
+    linear-gradient(
+      92deg,
+      #ff8862 0%,
+      #bba0ff 18%,
+      #d87bd0 36%,
+      #ee6faf 52%,
+      #5dddc8 70%,
+      #7dcfff 84%,
+      #c2ee76 100%
+    );
+  background-size: 180% 100%;
+  background-position: 0% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  transition:
+    color 260ms ease,
+    border-color 260ms ease,
+    background-position 640ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 260ms ease;
+}
+
+.footer-email-link:hover,
+.footer-email-link:focus-visible {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  border-color: rgba(93, 221, 200, 0.55);
+  background-position: 100% 50%;
 }
