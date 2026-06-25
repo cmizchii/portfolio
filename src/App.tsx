@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import shimMemojiVideo from '../images/memoji.mp4';
 import whosBlankHtml from './whosBlank.html?raw';
+import cosmeticsGrowthHtml from './cosmeticsGrowth.html?raw';
 
 type Tag = { text: string; color: string; top: string; left: string };
 type Viewport = { width: number; height: number };
@@ -393,10 +394,12 @@ const projects: Project[] = [
   },
   {
     id: '04',
-    title: 'Future Fit',
-    year: '2024',
-    description: 'Fitness dashboard exploration for scanning workouts, progress, and daily goals.',
-    accent: '#ff9f72',
+    title: 'Cosmetics Growth',
+    year: '2025',
+    description: 'A conversion-driven redesign and build of a cosmetics brand’s marketing site, made to turn browsers into buyers.',
+    accent: '#1EA8BA',
+    thumb: '/projects/cosmetics-growth/09e47586-4ab4-40ea-8320-d4b1a4338af3.png',
+    thumbType: 'desktop',
     position: { right: '18%', top: '72%', width: 'min(21vw, 315px)', height: 'min(16vw, 235px)' },
     focusOffset: { xVw: 0, yVh: -4 },
     start: -0.01,
@@ -3283,6 +3286,10 @@ function WhosBlankCaseStudy() {
   return <div className="wb-case" dangerouslySetInnerHTML={{ __html: whosBlankHtml }} />;
 }
 
+function CosmeticsGrowthCaseStudy() {
+  return <div className="cg-case" dangerouslySetInnerHTML={{ __html: cosmeticsGrowthHtml }} />;
+}
+
 function ProjectModal({ projectId, onClose }: { projectId: string; onClose: () => void }) {
   const project = projects.find((item) => item.id === projectId);
 
@@ -3355,6 +3362,8 @@ function ProjectModal({ projectId, onClose }: { projectId: string; onClose: () =
             <DaniCaseStudy />
           ) : projectId === '03' ? (
             <WhosBlankCaseStudy />
+          ) : projectId === '04' ? (
+            <CosmeticsGrowthCaseStudy />
           ) : (
             <div className="px-6 py-32 text-center md:px-10">
               <h2 className="text-[clamp(28px,4vw,44px)] font-semibold tracking-[-0.01em] text-[#1d1d1f]">
