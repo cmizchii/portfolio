@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import shimMemojiVideo from '../images/memoji.mp4';
+import whosBlankHtml from './whosBlank.html?raw';
 
 type Tag = { text: string; color: string; top: string; left: string };
 type Viewport = { width: number; height: number };
@@ -11,6 +12,8 @@ type Project = {
   year: string;
   description: string;
   accent: string;
+  thumb?: string;
+  thumbType?: 'phone' | 'desktop';
   position: React.CSSProperties;
   focusOffset?: { xVw: number; yVh: number };
   start: number;
@@ -351,21 +354,25 @@ const questionItems = [
 const projects: Project[] = [
   {
     id: '01',
-    title: 'Lemonmade',
+    title: 'Pinterest',
     year: '2026',
-    description: 'Meeting flow concept with fast room setup, clear invites, and calm controls.',
+    description: 'A concept redesign that lets people explore freely without wrecking their curated feed.',
     accent: '#8fc7ff',
-    position: { left: '-10vw', top: '18%', width: 'min(24vw, 330px)', height: 'min(28vw, 350px)' },
-    focusOffset: { xVw: 13, yVh: 0 },
+    thumb: '/projects/pinterest/search-desktop-after.png',
+    thumbType: 'desktop',
+    position: { left: '39%', top: '-8%', width: 'min(18vw, 260px)', height: 'min(15vw, 218px)' },
+    focusOffset: { xVw: 0, yVh: 12 },
     start: -0.04,
     end: 0.18,
   },
   {
     id: '02',
-    title: 'Inside Botanics',
+    title: 'Dani',
     year: '2025',
-    description: 'Editorial product page with quiet spacing, ingredient storytelling, and soft motion.',
-    accent: '#d8f26a',
+    description: 'A mood, journal, and AI-companion concept that folds four daily rituals into one calm space.',
+    accent: '#6E66A6',
+    thumb: '/projects/dani/01-hero-welcome.png',
+    thumbType: 'phone',
     position: { right: '-4vw', top: '13%', width: 'min(21vw, 305px)', height: 'min(27vw, 355px)' },
     focusOffset: { xVw: -13, yVh: 0 },
     start: -0.03,
@@ -373,12 +380,14 @@ const projects: Project[] = [
   },
   {
     id: '03',
-    title: 'Augen Lab',
+    title: "Who's Blank?",
     year: '2025',
-    description: 'Experimental landing page with atmospheric visuals and a focused product path.',
-    accent: '#bba0ff',
-    position: { left: '39%', top: '-8%', width: 'min(18vw, 260px)', height: 'min(15vw, 218px)' },
-    focusOffset: { xVw: 0, yVh: 12 },
+    description: 'A pass-and-play party game I designed and built so everyone gets to play, no host, no paper, nobody sitting out.',
+    accent: '#6E5499',
+    thumb: '/projects/whos-blank/6323e85d-0881-4d4d-86ab-ed9888293373.png',
+    thumbType: 'phone',
+    position: { left: '-9vw', top: '17%', width: 'min(20vw, 290px)', height: 'min(27vw, 360px)' },
+    focusOffset: { xVw: 13, yVh: 0 },
     start: -0.02,
     end: 0.22,
   },
@@ -1012,7 +1021,7 @@ function SecondScreen({ progress }: { progress: number }) {
       >
         Designing interfaces that feel
         <br />
-        right &mdash; clean, human, intentional.
+        right, clean, human, intentional.
       </h1>
     </div>
   );
@@ -1022,6 +1031,7 @@ function ProjectsSection() {
   const [projectProgress, setProjectProgress] = useState(0);
   const [aboutProgress, setAboutProgress] = useState(0);
   const [activeProject, setActiveProject] = useState<string | null>(null);
+  const [openProjectId, setOpenProjectId] = useState<string | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const projectStageRef = useRef<HTMLDivElement>(null);
   const aboutStageRef = useRef<HTMLDivElement>(null);
@@ -1173,6 +1183,7 @@ function ProjectsSection() {
                   activeIndex={activeIndex}
                   activeFocusOffset={activeFocusOffset}
                   onFocusProject={setActiveProject}
+                  onOpenProject={setOpenProjectId}
                 />
               ))}
             </div>
@@ -1189,6 +1200,10 @@ function ProjectsSection() {
       </div>
 
       <PortfolioDetails />
+
+      {openProjectId ? (
+        <ProjectModal projectId={openProjectId} onClose={() => setOpenProjectId(null)} />
+      ) : null}
     </section>
   );
 }
@@ -1631,6 +1646,7 @@ function ProjectCard({
   activeIndex,
   activeFocusOffset,
   onFocusProject,
+  onOpenProject,
 }: {
   project: Project;
   index: number;
@@ -1639,6 +1655,7 @@ function ProjectCard({
   activeIndex: number;
   activeFocusOffset?: { xVw: number; yVh: number };
   onFocusProject: (id: string | null) => void;
+  onOpenProject: (id: string) => void;
 }) {
   const motion = getProjectMotion(index);
   const sectionEnterProgress = easeSoft(progressBetween(progress, 0, 0.2));
@@ -1675,12 +1692,21 @@ function ProjectCard({
   return (
     <article
       tabIndex={0}
+      role="button"
+      aria-label={`Open ${project.title} case study`}
       data-project-id={project.id}
       onMouseEnter={() => onFocusProject(project.id)}
       onMouseLeave={() => onFocusProject(null)}
       onFocus={() => onFocusProject(project.id)}
       onBlur={() => onFocusProject(null)}
-      className="project-card absolute outline-none"
+      onClick={() => onOpenProject(project.id)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onOpenProject(project.id);
+        }
+      }}
+      className="project-card absolute cursor-pointer outline-none"
       style={{
         ...project.position,
         zIndex: isActive ? 30 : 12 + index,
@@ -1782,6 +1808,67 @@ function DecorativeProjectCard({
 function ProjectPlaceholder({ project, index }: { project: Project; index: number }) {
   const lineCount = index % 2 === 0 ? 4 : 3;
 
+  if (project.thumb) {
+    const isDesktop = project.thumbType === 'desktop';
+
+    return (
+      <div
+        className="relative h-full w-full overflow-hidden"
+        style={{
+          background: `radial-gradient(120% 90% at 50% 0%, ${project.accent}26 0%, #f4f2fb 46%, #ffffff 100%)`,
+        }}
+      >
+        <div className="absolute left-[7%] right-[7%] top-[7%] z-10 flex items-center justify-between text-[10px] font-medium uppercase tracking-[0.08em] text-[#8a8a8a]">
+          <span>{project.title}</span>
+          <span>{project.year}</span>
+        </div>
+
+        {isDesktop ? (
+          <div
+            className="absolute left-1/2 top-1/2 w-[84%] -translate-x-1/2 -translate-y-[44%] overflow-hidden border border-black/[0.06] bg-white"
+            style={{
+              borderRadius: '12px',
+              boxShadow: '0 22px 44px rgba(20,30,55,0.16), 0 6px 14px rgba(20,30,55,0.08)',
+            }}
+          >
+            <div className="flex h-[18px] items-center gap-1.5 bg-[#f3f3f5] px-2.5">
+              <span className="h-[5px] w-[5px] rounded-full bg-[#ff5f57]" />
+              <span className="h-[5px] w-[5px] rounded-full bg-[#febc2e]" />
+              <span className="h-[5px] w-[5px] rounded-full bg-[#28c840]" />
+            </div>
+            <img
+              src={project.thumb}
+              alt={`${project.title} — case study preview`}
+              loading="lazy"
+              draggable={false}
+              className="block aspect-[16/10] w-full select-none object-cover object-[center_top]"
+            />
+          </div>
+        ) : (
+          <div
+            className="absolute left-1/2 top-[24%] h-[110%] w-[60%] -translate-x-1/2 overflow-hidden border border-black/[0.06] bg-white"
+            style={{
+              borderRadius: '26px',
+              boxShadow: '0 28px 50px rgba(46,40,80,0.18), 0 8px 18px rgba(46,40,80,0.10)',
+            }}
+          >
+            <img
+              src={project.thumb}
+              alt={`${project.title} — case study preview`}
+              loading="lazy"
+              draggable={false}
+              className="block h-auto w-full select-none object-cover object-[center_top]"
+            />
+          </div>
+        )}
+
+        <div className="absolute bottom-[7%] right-[7%] z-10 text-[11px] text-[#606060]">
+          @{project.id}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="relative h-full w-full overflow-hidden"
@@ -1837,6 +1924,1448 @@ function ProjectPlaceholder({ project, index }: { project: Project; index: numbe
 
       <div className="absolute bottom-[7%] right-[7%] text-[11px] text-[#606060]">
         @{project.id}
+      </div>
+    </div>
+  );
+}
+
+const PINTEREST_IMG = '/projects/pinterest/';
+
+function CaseImage({
+  src,
+  alt,
+  className = '',
+  label,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  label?: string;
+}) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return (
+      <div
+        className={`flex items-center justify-center bg-[#f1f1f3] text-center text-[11px] font-medium uppercase tracking-[0.08em] text-[#b3b3b9] ${className}`}
+      >
+        {label ?? alt}
+      </div>
+    );
+  }
+
+  return (
+    <img src={src} alt={alt} loading="lazy" onError={() => setFailed(true)} className={className} />
+  );
+}
+
+function CaseSection({
+  eyebrow,
+  title,
+  children,
+  accent = '#E60023',
+}: {
+  eyebrow: string;
+  title?: string;
+  children?: React.ReactNode;
+  accent?: string;
+}) {
+  return (
+    <section className="case-reveal mt-24 px-6 md:mt-36 md:px-16">
+      <p className="text-[12px] font-semibold uppercase tracking-[0.2em]" style={{ color: accent }}>{eyebrow}</p>
+      {title ? (
+        <h2 className="mt-5 max-w-[760px] text-[clamp(28px,3.8vw,48px)] font-semibold leading-[1.08] tracking-[-0.02em] text-[#1d1d1f]">
+          {title}
+        </h2>
+      ) : null}
+      {children ? (
+        <div className="mt-7 max-w-[700px] space-y-6 text-[clamp(17px,1.7vw,19px)] leading-[1.75] text-[#56565b]">
+          {children}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+const pinterestMeta: [string, string][] = [
+  ['Role', 'UX Researcher & Designer'],
+  ['Type', 'Self-initiated · Solo'],
+  ['Platform', 'Mobile & Desktop'],
+  ['Focus', 'Interaction Design · IA'],
+];
+
+const originStats: [string, string][] = [
+  ['2', 'Core UX problems identified'],
+  ['6+', 'Friends consulted in research'],
+  ['4', 'Redesigned UI flows'],
+];
+
+const discoveryQuotes = [
+  {
+    initial: 'S',
+    name: 'Sara',
+    text: "Oh yeah, the board thing. I literally stopped organizing my pins because of it. I had 400 saved pins and nothing was where it should be because I couldn't be bothered to save each one to three different boards. So now I just dump everything into one board and it's a mess.",
+  },
+  {
+    initial: 'N',
+    name: 'Nour',
+    text: "Honestly the saving thing made me use it way less. It was fine when I had two boards but as I kept going it just became so annoying to save things properly that I kind of stopped caring. And then what's even the point of the app?",
+  },
+  {
+    initial: 'L',
+    name: 'Lana',
+    text: "Omg the search thing is so frustrating. I searched one time for a men's haircut, literally one search, and then for like three weeks my whole home page was men's haircuts and barber inspo. I had to click 'not interested' on like 50 posts. I just gave up.",
+  },
+  {
+    initial: 'M',
+    name: 'Maya',
+    text: "I stopped using Pinterest the way I used to, spending hours scrolling for art and fashion. Now I kind of just use it like a Google image search. Search, find what I need, leave. The home page doesn't feel like mine anymore.",
+  },
+];
+
+const insightCards = [
+  {
+    emoji: '📌',
+    title: 'Users abandon organization',
+    text: 'The friction of saving to one board at a time makes users stop organizing altogether, defeating one of Pinterest’s core features.',
+  },
+  {
+    emoji: '🔍',
+    title: 'Search feels risky',
+    text: 'Users avoid searching out of curiosity because the algorithm cost is too high. Curiosity has become a liability.',
+  },
+  {
+    emoji: '📱',
+    title: 'Feed loses trust',
+    text: 'When the feed no longer reflects actual taste, users disengage from discovery, the core Pinterest behavior.',
+  },
+  {
+    emoji: '⏱️',
+    title: 'Friction compounds',
+    text: 'Both issues worsen as usage deepens. New users barely notice; long-term devoted users feel it acutely, the users Pinterest most needs to keep.',
+  },
+];
+
+const researchStats = [
+  {
+    emoji: '📊',
+    title: '373 upvotes',
+    text: '"Pinterest is not the same anymore...", one of the most-engaged threads in r/Pinterest, full of users describing loss of trust.',
+  },
+  {
+    emoji: '🔁',
+    title: '"Make a new account"',
+    text: 'The top community answer to "how do I search without affecting my feed?", not a workaround, a failure.',
+  },
+  {
+    emoji: '📉',
+    title: 'Users are disengaging',
+    text: 'From hours of discovery to using Pinterest purely as a search tool, or not at all. Discovery is the core product, and it’s breaking.',
+  },
+  {
+    emoji: '🔒',
+    title: 'Pinterest admitted it',
+    text: 'Launching the 2019 Feed Tuner, they described fixing feeds "polluted with stuff users don’t want." They built the fix, then hid it.',
+  },
+];
+
+const multiColorChoices = [
+  { swatch: '#34c759', name: 'Green check', text: 'Universal "done" signal, but Pinterest uses green nowhere. Imports meaning from outside.', chosen: false },
+  { swatch: '#8a8a8f', name: 'Neutral gray', text: "Safe and quiet, but the selected state reads as maybe, not yes.", chosen: false },
+  { swatch: '#111111', name: 'Pure black', text: 'Definite and high-contrast, but pulls the eye away from the red Save button.', chosen: false },
+  { swatch: '#E60023', name: 'Pinterest red', text: "Same red as Save. Selection inherits the platform's existing meaning of committed action.", chosen: true },
+];
+
+const ghostColorChoices = [
+  { swatch: '#E60023', name: 'Pinterest red', text: 'On-brand, but ghost mode looks identical to a normal search. The state change is invisible.', chosen: false },
+  { swatch: '#ff8c42', name: 'Warm orange', text: 'Friendly, but orange reads as a warning, it makes ghost mode feel risky.', chosen: false },
+  { swatch: '#9a9aa0', name: 'Neutral gray', text: 'Clean, but gray reads as disabled, the opposite of "fully active, just private."', chosen: false },
+  { swatch: '#26215C', name: 'Deep navy', text: 'Far from Pinterest red, already linked to incognito privacy. Users decode it on first sight.', chosen: true },
+];
+
+type FigureMarker = { x: number; y: number; w: number; h: number; label?: string; labelPos?: 'top' | 'bottom' };
+
+function CaseFigure({
+  src,
+  caption,
+  className,
+  markers,
+}: {
+  src: string;
+  caption: string;
+  className: string;
+  markers?: FigureMarker[];
+}) {
+  return (
+    <figure className="case-reveal">
+      <div className="relative">
+        <CaseImage src={`${PINTEREST_IMG}${src}`} alt={caption} label={src} className={`w-full rounded-[18px] bg-[#f5f5f7] ${className}`} />
+        {markers?.map((marker, index) => (
+          <span
+            key={index}
+            className="case-marker"
+            style={{ left: `${marker.x}%`, top: `${marker.y}%`, width: `${marker.w}%`, height: `${marker.h}%` }}
+          >
+            {marker.label ? (
+              <span className={`case-marker-label ${marker.labelPos === 'bottom' ? 'is-bottom' : ''}`}>{marker.label}</span>
+            ) : null}
+          </span>
+        ))}
+      </div>
+      <figcaption className="mt-4 text-[14px] leading-[1.5] text-[#86868b]">{caption}</figcaption>
+    </figure>
+  );
+}
+
+function FriendQuote({ initial, name, text }: { initial: string; name: string; text: string }) {
+  return (
+    <div className="case-reveal flex gap-4 rounded-[24px] bg-[#f5f5f7] p-7 md:p-8">
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1d1d1f] text-[15px] font-semibold text-white">
+        {initial}
+      </span>
+      <div>
+        <p className="text-[15px] font-semibold text-[#1d1d1f]">{name}</p>
+        <p className="mt-2.5 text-[16px] leading-[1.65] text-[#4f4f55]">&ldquo;{text}&rdquo;</p>
+      </div>
+    </div>
+  );
+}
+
+function RedditQuote({ user, votes, text }: { user: string; votes: string; text: string }) {
+  return (
+    <div className="case-reveal rounded-[20px] border border-black/[0.08] p-6">
+      <div className="flex items-center gap-2 text-[14px]">
+        <span className="font-semibold text-[#1d1d1f]">{user}</span>
+        <span className="text-[#ff6b4a]">▲ {votes}</span>
+      </div>
+      <p className="mt-3 text-[16px] leading-[1.6] text-[#4f4f55]">&ldquo;{text}&rdquo;</p>
+    </div>
+  );
+}
+
+function InfoCard({ emoji, title, text }: { emoji: string; title: string; text: string }) {
+  return (
+    <div className="case-reveal rounded-[24px] bg-[#f5f5f7] p-7">
+      <div className="text-[30px]">{emoji}</div>
+      <h3 className="mt-4 text-[17px] font-semibold leading-[1.25] text-[#1d1d1f]">{title}</h3>
+      <p className="mt-2.5 text-[15px] leading-[1.55] text-[#6e6e73]">{text}</p>
+    </div>
+  );
+}
+
+function BigStat({ value, label, accent = '#E60023' }: { value: string; label: string; accent?: string }) {
+  return (
+    <div className="case-reveal">
+      <div className="text-[clamp(48px,7vw,76px)] font-semibold leading-none tracking-[-0.03em]" style={{ color: accent }}>{value}</div>
+      <p className="mt-4 text-[15px] leading-[1.45] text-[#6e6e73]">{label}</p>
+    </div>
+  );
+}
+
+function PullQuote({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="case-reveal mt-20 px-6 md:mt-32 md:px-16">
+      <p className="max-w-[920px] text-[clamp(24px,3.6vw,42px)] font-medium leading-[1.28] tracking-[-0.015em] text-[#1d1d1f]">
+        {children}
+      </p>
+    </div>
+  );
+}
+
+function Choice({ chosen, label, children }: { chosen: boolean; label: string; children: React.ReactNode }) {
+  return (
+    <div className={`case-reveal rounded-[24px] border p-7 md:p-8 ${chosen ? 'border-[#34c759]/40 bg-[#f1faf3]' : 'border-black/10 bg-white'}`}>
+      <p className={`text-[12px] font-semibold uppercase tracking-[0.08em] ${chosen ? 'text-[#1d9c43]' : 'text-[#c0392b]'}`}>
+        {chosen ? '✓ Chosen' : '✗ Rejected'},{label}
+      </p>
+      <p className="mt-3.5 text-[16px] leading-[1.6] text-[#4f4f55]">{children}</p>
+    </div>
+  );
+}
+
+function ColorSwatch({ swatch, name, text, chosen }: { swatch: string; name: string; text: string; chosen: boolean }) {
+  return (
+    <div className={`case-reveal rounded-[20px] border p-6 ${chosen ? 'border-[#1d1d1f]' : 'border-black/10'}`}>
+      <div className="h-16 w-full rounded-[12px]" style={{ background: swatch }} />
+      <p className="mt-5 text-[15px] font-semibold text-[#1d1d1f]">{name}</p>
+      <p className="mt-2 text-[14px] leading-[1.5] text-[#6e6e73]">{text}</p>
+      <p className={`mt-4 text-[12px] font-semibold ${chosen ? 'text-[#1d9c43]' : 'text-[#c0392b]'}`}>
+        {chosen ? '✓ Chosen' : '✗ Rejected'}
+      </p>
+    </div>
+  );
+}
+
+function ProcessStep({ n, label, title, children, accent = '#E60023' }: { n: string; label: string; title: string; children: React.ReactNode; accent?: string }) {
+  return (
+    <div className="case-reveal border-t border-black/10 pt-10">
+      <div className="flex items-baseline gap-3">
+        <span className="text-[14px] font-semibold" style={{ color: accent }}>{n}</span>
+        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#a1a1a6]">{label}</span>
+      </div>
+      <h3 className="mt-4 max-w-[720px] text-[clamp(22px,2.6vw,32px)] font-semibold leading-[1.15] tracking-[-0.015em] text-[#1d1d1f]">
+        {title}
+      </h3>
+      <div className="mt-5 max-w-[700px] space-y-5 text-[17px] leading-[1.7] text-[#56565b]">{children}</div>
+    </div>
+  );
+}
+
+function PinterestCaseStudy() {
+  return (
+    <article className="pb-32">
+      {/* ===== Hero ===== */}
+      <header className="px-6 pt-12 md:px-16 md:pt-16">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.2em] text-[#E60023]">UX Case Study · Pinterest</p>
+        <h1 className="mt-5 max-w-[760px] text-[clamp(30px,4.4vw,58px)] font-semibold leading-[1.04] tracking-[-0.03em] text-[#1d1d1f]">
+          When a platform you love starts working against you
+        </h1>
+        <p className="mt-6 max-w-[560px] text-[clamp(15px,1.5vw,18px)] leading-[1.55] text-[#6e6e73]">
+          A personal investigation into two friction points that quietly erode the Pinterest experience, and the
+          redesign solutions that give users back control.
+        </p>
+
+        <dl className="mt-12 grid grid-cols-2 gap-x-8 gap-y-7 border-t border-black/10 pt-10 md:grid-cols-4">
+          {pinterestMeta.map(([key, value]) => (
+            <div key={key}>
+              <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#a1a1a6]">{key}</dt>
+              <dd className="mt-2 text-[15px] font-medium text-[#1d1d1f]">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      </header>
+
+      {/* ===== Hero visual ===== */}
+      <div className="mt-14 px-6 md:mt-16 md:px-16">
+        <figure className="mx-auto max-w-[1000px]">
+          <div
+            className="overflow-hidden rounded-[16px] border border-black/[0.08] bg-white"
+            style={{ boxShadow: '0 34px 80px rgba(20,30,55,0.18), 0 10px 22px rgba(20,30,55,0.10)' }}
+          >
+            <div className="flex h-9 items-center gap-2 border-b border-black/[0.06] bg-[#f4f4f6] px-4">
+              <span className="h-[10px] w-[10px] rounded-full bg-[#ff5f57]" />
+              <span className="h-[10px] w-[10px] rounded-full bg-[#febc2e]" />
+              <span className="h-[10px] w-[10px] rounded-full bg-[#28c840]" />
+              <span className="ml-3 hidden h-[20px] flex-1 items-center rounded-full bg-white px-3 text-[11px] text-[#a1a1a6] sm:flex">
+                pinterest.com
+              </span>
+            </div>
+            <CaseImage
+              src={`${PINTEREST_IMG}search-desktop-after.png`}
+              alt="Pinterest home feed after the redesign"
+              label="search-desktop-after.png"
+              className="block aspect-[16/10] w-full object-cover object-top"
+            />
+          </div>
+          <figcaption className="mx-auto mt-5 max-w-[620px] text-center text-[14px] leading-[1.5] text-[#86868b]">
+            The redesign in one view: a quick search no longer hijacks your home feed, so the
+            curation you built stays yours.
+          </figcaption>
+        </figure>
+      </div>
+
+      {/* ===== The Origin ===== */}
+      <CaseSection eyebrow="The Origin" title="I didn't set out to do a case study. I just got annoyed.">
+        <p>
+          I&rsquo;ve been using Pinterest since I was around fourteen, almost a decade of saving outfits,
+          collecting art references, and building mood boards for rooms I&rsquo;d never actually decorate. At its
+          best, Pinterest feels less like social media and more like a personal archive of who you are and who you
+          want to become.
+        </p>
+        <p>
+          So when it started feeling frustrating, not dramatically, but in that quiet, persistent way where you
+          notice you&rsquo;re enjoying something a little less every time, I paid attention. Design is rarely
+          about dramatic failures; it&rsquo;s about the accumulation of small frictions that slowly make a product
+          feel like it&rsquo;s working against you. This case study focuses on two such issues, both rooted in the
+          same problem: the user has lost control of their own experience.
+        </p>
+      </CaseSection>
+
+      <PullQuote>
+        I wasn&rsquo;t trying to fix Pinterest. I was just trying to understand{' '}
+        <span className="text-[#a1a1a6]">why I&rsquo;d started using it less.</span>
+      </PullQuote>
+
+      <div className="mt-14 grid gap-y-10 px-6 md:grid-cols-3 md:gap-x-12 md:px-16">
+        {originStats.map(([value, label]) => (
+          <BigStat key={label} value={value} label={label} />
+        ))}
+      </div>
+
+      {/* ===== Discovery ===== */}
+      <CaseSection eyebrow="Discovery" title="It wasn't just me, and that made it interesting.">
+        <p>
+          My first instinct was that I was being too critical. So I asked friends, over voice notes, casual
+          messages, late-night calls. Not formal interviews. Just: &ldquo;does anything about Pinterest annoy
+          you?&rdquo; What came back was the same frustrations, word for word, from people who&rsquo;d never
+          thought about UX a day in their lives.
+        </p>
+      </CaseSection>
+
+      <div className="mt-8 grid gap-4 px-6 md:grid-cols-2 md:px-16">
+        {discoveryQuotes.map((quote) => (
+          <FriendQuote key={quote.name} {...quote} />
+        ))}
+      </div>
+
+      <PullQuote>
+        The home page doesn&rsquo;t feel like mine anymore.{' '}
+        <span className="text-[#a1a1a6]">For a platform whose entire value is personalization, that&rsquo;s a fundamental failure.</span>
+      </PullQuote>
+
+      <div className="mt-12 grid gap-4 px-6 sm:grid-cols-2 md:grid-cols-4 md:px-16">
+        {insightCards.map((card) => (
+          <InfoCard key={card.title} {...card} />
+        ))}
+      </div>
+
+      {/* ===== Secondary Research ===== */}
+      <CaseSection eyebrow="Secondary Research" title="It's all over Reddit, and has been for years.">
+        <p>
+          On r/Pinterest the same two frustrations recur for years, from users with no connection to each other,
+          the same words, the same workarounds, the same defeated conclusions. The most telling sign wasn&rsquo;t
+          the complaints. It was the answer people kept getting: &ldquo;just make a new account.&rdquo; That&rsquo;s
+          not a workaround. That&rsquo;s a platform failing so completely the fix is to abandon what you built.
+        </p>
+      </CaseSection>
+
+      <div className="mt-8 space-y-4 px-6 md:px-16">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#a1a1a6]">
+          Thread,&ldquo;Is there some way to explore pins without affecting my home feed?&rdquo;
+        </p>
+        <div className="grid gap-3 md:grid-cols-2">
+          <RedditQuote user="greendolphinfeet" votes="1" text="Should I just create a new account for fashion related pins? That's what I'd do." />
+          <RedditQuote user="Alternative_Tell_781" votes="1" text="Unfortunately I believe the only option right now is to make a separate account." />
+        </div>
+        <CaseFigure src="reddit-explore.png" caption="r/Pinterest · QueenMackeral · 3 years ago, still no solution from Pinterest." className="aspect-[16/10] object-contain" />
+      </div>
+
+      <div className="mt-12 space-y-4 px-6 md:px-16">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#a1a1a6]">
+          Thread,&ldquo;Pinterest is not the same anymore...&rdquo; · 373 upvotes · 79 comments
+        </p>
+        <div className="grid gap-3 md:grid-cols-2">
+          <RedditQuote user="aeconic" votes="16" text="FOR REAL. If I search up something on Pinterest, the first like 20 pins are ALL ADS. It takes me four swipes to get past them. Absolutely ridiculous." />
+          <RedditQuote user="njomw" votes="15" text="As an artist, Pinterest was a great source of inspiration. I had 7k followers. Then they commercialized it, my views dropped into the low 100s, and it became impossible to find new artists or inspiration." />
+          <RedditQuote user="AcceptableBee1592" votes="35" text="If I didn't have my Pinterest boards the way I wanted them I'd probably delete the app now. Pinterest is going to have to make some really hard rules soon or die out." />
+          <RedditQuote user="lbhall06757" votes="2" text="I even tried using quotes like other searches and it still brings up items that have little or nothing to do with what I am searching for. Losing interest in Pinterest!" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <CaseFigure src="reddit-artists.png" caption="The comment thread, artists & long-term users on the algorithm shift." className="aspect-[16/10] object-contain" />
+          <CaseFigure src="reddit-disengaging.png" caption="More responses, users describing how they've disengaged." className="aspect-[16/10] object-contain" />
+        </div>
+      </div>
+
+      <PullQuote>
+        Pinterest itself acknowledged the feed problem in 2019 with &ldquo;Tune Your Home Feed.&rdquo; Early testing
+        cut complaints by over 50%.{' '}
+        <span className="text-[#a1a1a6]">They built the fix, then buried it five layers deep in settings where nobody would find it.</span>
+      </PullQuote>
+
+      <div className="mt-12 grid gap-4 px-6 sm:grid-cols-2 md:grid-cols-4 md:px-16">
+        {researchStats.map((card) => (
+          <InfoCard key={card.title} {...card} />
+        ))}
+      </div>
+
+      {/* ===== Problem 01 ===== */}
+      <CaseSection eyebrow="Problem 01" title="Saving to boards is a one-at-a-time chore.">
+        <p>
+          Saving a pin to multiple boards means repeating the entire save flow from scratch for each one. Tap save.
+          Pick a board. Sheet closes. Reopen the pin. Tap save again. Repeat indefinitely. In isolation it sounds
+          minor; in practice it&rsquo;s a compounding tax on organization. The more boards you have, devoted users
+          often have twenty or thirty, the more painful it gets. So most users stop. They pick one board, or
+          don&rsquo;t save at all.
+        </p>
+      </CaseSection>
+
+      <div className="mt-8 px-6 md:px-16">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#a1a1a6]">
+          Real user evidence, my own Pinterest · mobile
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <CaseFigure src="save-1.png" caption="Step 1: one save button. Tapping it opens a board picker, one board at a time." className="aspect-[9/19] object-contain" />
+          <CaseFigure src="save-2.png" caption="Step 2: pick a board and the sheet closes immediately. Want another? Start over." className="aspect-[9/19] object-contain" />
+          <CaseFigure src="save-3.png" caption="Step 3: repeat for a second board. Two saves = two full actions." className="aspect-[9/19] object-contain" />
+        </div>
+      </div>
+
+      <div className="mt-10 px-6 md:px-16">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#a1a1a6]">Desktop, same issue</p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <CaseFigure src="save-desktop-1.png" caption="Save modal, selecting one board confirms and dismisses immediately." className="aspect-[16/10] object-contain" />
+          <CaseFigure src="save-desktop-2.png" caption="Had to reopen the entire modal to save to a second board." className="aspect-[16/10] object-contain" />
+          <CaseFigure src="save-desktop-3.png" caption="The 'Saved' state shows just one board, repeat for every other." className="aspect-[16/10] object-contain" />
+        </div>
+      </div>
+
+      <CaseSection eyebrow="The Redesign, Multi-select save" title="Check multiple boards, confirm once.">
+        <p>
+          One action instead of many. Before opening Figma there were napkin sketches, friend reviews, and
+          back-and-forth. I started phone-first, most saves happen on mobile, and small screens force sharp
+          decisions about hierarchy. If it works thumb-first, desktop is downhill.
+        </p>
+      </CaseSection>
+
+      <div className="mt-10 space-y-10 px-6 md:px-16">
+        <ProcessStep n="01" label="The spark" title="The night I saved the same pin five times.">
+          <p>
+            Building a mood board at midnight, a linen dress kept showing up that I wanted in summer fits, florals,
+            and wedding guest. After the third &ldquo;reopen → save → pick → confirm → close&rdquo; loop for the
+            same pin, I just stopped. I&rsquo;d been doing this for nine years. Why wasn&rsquo;t this already how it
+            works?
+          </p>
+        </ProcessStep>
+
+        <ProcessStep n="02" label="Sketch" title="The first sketch took 90 seconds.">
+          <p>
+            Almost embarrassingly small: a checkbox next to every board, one save button at the bottom. I sketched
+            both surfaces but spent most of the time on mobile, because that&rsquo;s where the friction is loudest.
+          </p>
+        </ProcessStep>
+
+        <ProcessStep n="03" label="Friend test #1" title="I showed two friends. They poked holes in it.">
+          <div className="grid gap-4 md:grid-cols-2">
+            <FriendQuote initial="S" name="Sara" text="Wait, when I tap the first board, does the sheet just close like it does now? Or does it stay so I can keep picking?" />
+            <FriendQuote initial="N" name="Nour" text="I'd want to know how many I've picked before I hit save. If I check four and meant three, I'd want to catch it." />
+          </div>
+          <p>
+            <span className="font-medium text-[#1d1d1f]">Insight:</span> the sketch had no live state. The user is
+            making decisions in their head but the UI gives no feedback until they commit. That&rsquo;s a trust gap.
+          </p>
+        </ProcessStep>
+
+        <ProcessStep n="04" label="Iteration" title="Made the state visible.">
+          <p>
+            Two changes. A persistent Save button locked to the bottom with the count baked into its label,
+            &ldquo;Save to 3 boards&rdquo;, updating the instant you tap a checkbox. And the sheet no longer
+            auto-closes until you hit Save. The flow is the user&rsquo;s job now, not a script Pinterest runs on
+            them.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-[14px] border border-black/10 px-5 py-4 text-center text-[14px] font-medium text-[#b3b3b9]">Select boards above</div>
+            <div className="rounded-[14px] bg-[#1d1d1f] px-5 py-4 text-center text-[14px] font-semibold text-white">Save to 1 board</div>
+            <div className="rounded-[14px] bg-[#E60023] px-5 py-4 text-center text-[14px] font-semibold text-white">Save to 3 boards</div>
+          </div>
+        </ProcessStep>
+
+        <ProcessStep n="05" label="Color" title="What color should the selected state be?">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {multiColorChoices.map((choice) => (
+              <ColorSwatch key={choice.name} {...choice} />
+            ))}
+          </div>
+          <p>
+            The red checkbox does double duty: it shows a board is selected, and it pre-tells you what the Save
+            button will look like on confirm. The visual chain is unbroken from checkbox → button → commit.
+          </p>
+        </ProcessStep>
+
+        <ProcessStep n="06" label="Friend test #2" title="Same friends. A quiet 'oh.'">
+          <div className="grid gap-4 md:grid-cols-2">
+            <FriendQuote initial="S" name="Sara" text="Oh wait. Yeah. Of course it should work this way. I don't even need to think about it." />
+            <FriendQuote initial="N" name="Nour" text="The little count on the button is the part I'd actually trust. I always want to know what I'm about to do." />
+          </div>
+          <p>The flow felt invisible, like infrastructure. That&rsquo;s the green light to move into hi-fi.</p>
+        </ProcessStep>
+      </div>
+
+      <div className="mt-12 px-6 md:px-16">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#a1a1a6]">Proposed solution, designed in Figma</p>
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
+          <CaseFigure src="multi-pin.png" caption="One pin, three boards, this banana toast could live in food, vibes, and ig feed at once." className="aspect-[9/19] object-contain" />
+          <CaseFigure src="multi-before.png" caption="Before, tap a board, it saves and closes. No selection state." className="aspect-[9/19] object-contain" />
+          <CaseFigure src="multi-after.png" caption="After: check, check, check, one save. A checkbox per row, persistent red Save button with a live count." className="aspect-[9/19] object-contain" />
+        </div>
+      </div>
+
+      <CaseSection eyebrow="Design rationale" title="Multi-board save, decision by decision." />
+      <div className="mt-8 grid gap-4 px-6 md:grid-cols-2 md:px-16">
+        <Choice chosen label="Checkboxes, right of each row">
+          The most universally understood multi-select pattern, anyone who&rsquo;s filled in a form gets it. Round
+          to match Pinterest&rsquo;s soft visual language; right-aligned so users read the board name, decide, then check.
+        </Choice>
+        <Choice chosen={false} label="Long-press or drag-to-select">
+          Discoverable but invisible, users who don&rsquo;t know the gesture exists never find it, and it doesn&rsquo;t
+          translate to desktop at all.
+        </Choice>
+        <Choice chosen label="Live count above the button">
+          A constant summary of state so users don&rsquo;t scroll back to verify. It acts as a final preview:
+          &ldquo;you&rsquo;re about to save to 2 boards, confirm?&rdquo;
+        </Choice>
+        <Choice chosen label='Dynamic label: "Save to N boards"'>
+          The button confirms intent so there&rsquo;s no mental tracking. Static &ldquo;Save&rdquo; caused a beat of
+          hesitation in testing, and friction at the final step risks abandoned actions.
+        </Choice>
+        <Choice chosen label="Replaces 'Create new board' as the primary CTA">
+          Users save 50× before creating a board. The primary action should always be one tap away, where the thumb
+          already goes. Create-new-board moves into the list, where it belongs.
+        </Choice>
+        <Choice chosen label="Safe under Pinterest's anti-spam rules">
+          One deliberate save selecting 2–3 boards is the opposite of a bot blasting 40 boards. The design models
+          exactly the thoughtful, intentional pinning Pinterest says it wants (and respects the 10-board cap).
+        </Choice>
+      </div>
+
+      {/* ===== Problem 02 ===== */}
+      <CaseSection eyebrow="Problem 02" title="One search. Your feed is never the same again.">
+        <p>
+          Pinterest&rsquo;s algorithm learns from everything, including searches. On the surface that sounds good.
+          In practice, a single exploratory search permanently alters your feed. I searched &ldquo;room decor&rdquo;
+          once, out of curiosity, and within minutes my home page surfaced interior content that had nothing to do
+          with what I use Pinterest for. I hadn&rsquo;t asked it to. I had no way to prevent it.
+        </p>
+      </CaseSection>
+
+      <div className="mt-8 px-6 md:px-16">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#a1a1a6]">
+          Algorithm contamination, captured minutes apart · mobile
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <CaseFigure src="search-mobile-before.png" caption="Home feed before any search, cute doodles, dolls, JoJo fanart. Months of curation." className="aspect-[9/19] object-contain" />
+          <CaseFigure src="search-mobile-search.png" caption="One quick search for 'room decor.' Note the wire shoe-rack at the top." className="aspect-[9/19] object-contain" />
+          <CaseFigure
+            src="search-mobile-after.png"
+            caption="One minute later, the same shoe-rack now lives in the home feed. The algorithm acted immediately."
+            className="aspect-[9/19] object-contain"
+            markers={[{ x: 51, y: 24, w: 47, h: 21, label: 'Same pin, now in your feed', labelPos: 'bottom' }]}
+          />
+        </div>
+      </div>
+
+      <div className="mt-10 px-6 md:px-16">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#a1a1a6]">Desktop, the same contamination</p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <CaseFigure src="search-desktop-before.png" caption="Clean, curated feed, design content, fonts, UI references." className="aspect-[16/10] object-contain" />
+          <CaseFigure src="search-desktop-search.png" caption="One search query entered, no saving, no clicking through." className="aspect-[16/10] object-contain" />
+          <CaseFigure src="search-desktop-after.png" caption="Room decor and home content now appear in the home feed, from one search." className="aspect-[16/10] object-contain" />
+        </div>
+      </div>
+
+      <CaseSection eyebrow="The fix that exists but nobody finds">
+        <p>
+          Pinterest does have a buried &ldquo;Tune your home feed&rdquo; page. On paper the control exists. In
+          practice it&rsquo;s invisible, reaching it takes five separate screens: Home → Profile → Settings →
+          Privacy &amp; Data → Tune your home feed. I&rsquo;ve used Pinterest for nearly a decade and didn&rsquo;t
+          know it existed until I went looking. That&rsquo;s not user error, it&rsquo;s an information architecture
+          failure.
+        </p>
+      </CaseSection>
+
+      <CaseSection eyebrow="The Redesign, Ghost Search" title="Search freely. Your feed stays exactly as you left it.">
+        <p>
+          The save flow was a structural problem with a clean answer. Ghost Search is a trust problem, and trust
+          lives in details users can&rsquo;t articulate. The path from sketch to final ran through one uncomfortable
+          round of feedback that almost made me start over.
+        </p>
+      </CaseSection>
+
+      <div className="mt-10 space-y-10 px-6 md:px-16">
+        <ProcessStep n="01" label="The spark" title="I caught myself not using the search bar.">
+          <p>
+            Twice in one week I opened Pinterest, hovered over the search bar, and closed the app instead, once for
+            tattoo ideas, once for a recipe. I was protecting my feed. The platform had trained me to treat its
+            primary discovery surface as a liability.
+          </p>
+        </ProcessStep>
+
+        <ProcessStep n="02" label="Sketch" title="Started with the same instinct as Chrome incognito.">
+          <p>
+            Incognito works because the entry point is at the moment of action. So I put the toggle inside the search
+            bar itself, phone-first again, since most sessions are mobile and the search bar is high-pressure UI on
+            small screens.
+          </p>
+        </ProcessStep>
+
+        <ProcessStep n="03" label="Friend test #1" title="They didn't understand it.">
+          <div className="grid gap-4 md:grid-cols-2">
+            <FriendQuote initial="L" name="Lana" text="What does ghost mean? Like… is it deleting my searches? I'd be scared to tap it." />
+            <FriendQuote initial="M" name="Maya" text="Wait, does this hide me from other people? Like an invisible mode?" />
+          </div>
+          <p>
+            <span className="font-medium text-[#1d1d1f]">Insight:</span> the metaphor only works after you know what
+            it does. The first-time user needs plain language at the exact moment of activation, in the interface
+            itself, not a help doc.
+          </p>
+        </ProcessStep>
+
+        <ProcessStep n="04" label="Iteration" title="Added a banner that explains in plain English.">
+          <p>
+            Right under the bar, visible the moment ghost mode turns on: &ldquo;ghost mode, feed won&rsquo;t
+            change.&rdquo; Six words, no icons doing language&rsquo;s job. The banner carries the first few uses;
+            after that, the bar&rsquo;s color is enough.
+          </p>
+          <div className="overflow-hidden rounded-[14px]" style={{ background: '#26215C' }}>
+            <div className="px-5 py-4 text-[14px] font-medium" style={{ color: '#CECBF6' }}>
+              👻 &nbsp;ghost mode, feed won&rsquo;t change
+            </div>
+          </div>
+        </ProcessStep>
+
+        <ProcessStep n="05" label="Color" title="An entire afternoon picking a color.">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {ghostColorChoices.map((choice) => (
+              <ColorSwatch key={choice.name} {...choice} />
+            ))}
+          </div>
+          <p>
+            With Pinterest red, ghost mode and normal search were indistinguishable, that was the bug. The whole
+            point of a private mode is that the user can see they&rsquo;re in it. Color is the cheapest signal, and
+            it had to be one Pinterest uses nowhere else.
+          </p>
+        </ProcessStep>
+
+        <ProcessStep n="06" label="Friend test #2" title="This time they got it instantly.">
+          <div className="grid gap-4 md:grid-cols-2">
+            <FriendQuote initial="L" name="Lana" text="Oh, this is incognito! Like Chrome. Yeah, I'd actually use this, I'd use it constantly." />
+            <FriendQuote initial="M" name="Maya" text="The little message under the bar is what sells it. I'd trust that. I wouldn't trust just the icon." />
+          </div>
+          <p>The color is the recognition. The banner is the contract. Round 01 saved the entire design.</p>
+        </ProcessStep>
+      </div>
+
+      <div className="mt-12 px-6 md:px-16">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#a1a1a6]">Proposed solution, designed in Figma</p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <CaseFigure src="ghost-before.png" caption="Before, one bar, one mode. Every search trains the feed, with no way to opt out." className="aspect-[9/19] object-contain" />
+          <CaseFigure src="ghost-active.png" caption="After: tap the ghost and the bar goes deep navy, banner reads 'feed won't change.' Impossible to miss." className="aspect-[9/19] object-contain" />
+        </div>
+      </div>
+
+      <CaseSection eyebrow="Design rationale" title="Ghost Search, decision by decision." />
+      <div className="mt-8 grid gap-4 px-6 md:grid-cols-2 md:px-16">
+        <Choice chosen label="One bar, one toggle, not a second search bar">
+          Ghost mode is a state of the search, not a separate product. Two bars overstate the difference and clutter
+          the nav; one bar with a toggle keeps the right mental model and lets users decide at the moment of searching.
+        </Choice>
+        <Choice chosen label="Compact pill on the right of the bar">
+          Always visible, never intrusive, the natural home for mode-modifiers (filters, camera, voice already live
+          there). Inside the bar competes with the cursor; a tab above implies equal, everyday frequency.
+        </Choice>
+        <Choice chosen label="Deep navy (#26215C), not red/gray/black">
+          Red reads as urgent action and blends with Save; gray reads as disabled; black mimics device-level
+          incognito. Navy feels intentional and distinct, and pairs with soft lavender (#CECBF6) for a slightly
+          otherworldly, on-metaphor palette.
+        </Choice>
+        <Choice chosen label="The whole bar changes color, not a small badge">
+          A dot or badge is too easy to miss. Trust requires the user to feel the mode they&rsquo;re in, same
+          principle as Chrome&rsquo;s incognito window, where the entire chrome changes.
+        </Choice>
+        <Choice chosen label='Persistent banner: "feed won’t change"'>
+          Testing showed people misread ghost mode as hiding history from other people. The banner names the actual
+          promise, privacy from the algorithm, in scannable plain language for first-time users.
+        </Choice>
+        <Choice chosen label="A ghost 👻, not a lock or shield">
+          A lock implies encryption and over-promises; an eye-slash implies nobody&rsquo;s watching. A ghost lands
+          the real promise, this leaves no trace, and keeps Pinterest&rsquo;s soft, playful tone.
+        </Choice>
+        <Choice chosen label="Saving still works in ghost mode">
+          A save is an intentional preference signal, not a search signal, different things, treated differently.
+          Ghost mode should be consequence-free exploration, not a restricted zone.
+        </Choice>
+        <Choice chosen label="Lavender text (#CECBF6), not pure white">
+          White on navy passes AA but reads harsh and clinical. Lavender keeps a 4.8:1 contrast ratio while feeling
+          warmer and reinforcing that you&rsquo;re in a shifted, different universe.
+        </Choice>
+      </div>
+
+      {/* ===== Reflection ===== */}
+      <CaseSection eyebrow="Reflection & Next Steps" title="What I'd do next.">
+        <p>
+          This is a focused redesign of two flows. A full product cycle would add structured testing, edge cases,
+          and engineering scope: moderated usability tests (especially for ghost mode, which lives on trust); edge
+          cases like accidentally exiting ghost mid-search or undoing a multi-save; and accessibility, WCAG 2.1 AA
+          touch targets, ghost-mode contrast in low-vision scenarios, and screen-reader labels for every count and
+          dynamic button.
+        </p>
+      </CaseSection>
+
+      <PullQuote>
+        The best redesigns don&rsquo;t add features. They remove friction from the ones that already matter.
+      </PullQuote>
+
+      <CaseSection eyebrow="Closing">
+        <p>
+          Both solutions are intentionally minimal, no rebuilds, just one key addition each: selection state for
+          boards, and session scope for search. Low engineering lift, high user impact. That ratio is the clearest
+          signal that these are the right problems to solve, and the right level to solve them at.
+        </p>
+        <p className="text-[14px] text-[#a1a1a6]">Pinterest UX Case Study · Self-initiated · 2026 · Research · Interaction Design · UI Redesign</p>
+      </CaseSection>
+    </article>
+  );
+}
+
+const DANI_ACCENT = '#6E66A6';
+const DANI_INK = '#2A2640';
+const DANI_IMG = '/projects/dani/';
+
+const daniMeta: [string, string][] = [
+  ['Role', 'Solo · UX, UI & front-end'],
+  ['Timeline', 'Self-initiated · 2025'],
+  ['Tools', 'Figma · React'],
+  ['Platform', 'iOS + Web'],
+];
+
+const daniProblemCards: { emoji: string; title: string; text: string; highlight?: boolean }[] = [
+  { emoji: '🙂', title: 'Mood, flattened', text: 'One app reduces a whole day to a single tappable emoji.' },
+  { emoji: '📷', title: 'Memories, elsewhere', text: 'Another is just a photo journal, disconnected from how you felt.' },
+  { emoji: '😴', title: 'Sleep, in a silo', text: 'A third tracks rest and steps but never asks why.' },
+  { emoji: '💬', title: 'Nobody to talk to', text: 'And when you need to be heard, there’s no one on the other side.', highlight: true },
+];
+
+const daniOpportunityCards = [
+  {
+    n: '01',
+    title: 'One ritual, many signals',
+    text: 'Mood, sleep, a reflection and a photo, captured in one gentle daily check-in instead of four apps.',
+  },
+  {
+    n: '02',
+    title: 'A companion you own',
+    text: "Dani isn’t a faceless chatbot. You choose its tone, set boundaries, and grow it over time.",
+  },
+  {
+    n: '03',
+    title: 'Gentle, never clinical',
+    text: 'Soft color, a round friendly mascot and warm copy make checking in feel like care, not homework.',
+  },
+];
+
+const daniOnboardingItems = [
+  {
+    emoji: '🎭',
+    title: 'Personality presets',
+    text: 'Playful, Friendly or Calm, the voice you find easiest to hear.',
+  },
+  {
+    emoji: '🔔',
+    title: 'Check-in mode',
+    text: "Dani can reach out when you’ve been away or down, only if you want it to.",
+  },
+  {
+    emoji: '🔒',
+    title: 'Privacy by default',
+    text: 'A clear toggle keeps chats on-device. Trust is the product.',
+  },
+];
+
+const daniCheckinSteps = [
+  {
+    n: '1',
+    label: 'Mood',
+    img: '03-checkin-mood.png',
+    text: 'A draggable mood dial reads as feeling, not a checkbox, and the color shifts with you.',
+  },
+  {
+    n: '2',
+    label: 'Sleep',
+    img: '04-checkin-sleep.png',
+    text: 'Quality and hours in one vertical slider, each tier anchored by a face.',
+  },
+  {
+    n: '3',
+    label: 'Reflect',
+    img: '05-checkin-reflect.png',
+    text: 'Write it down, or tap “use voice instead.” No pressure to perform.',
+  },
+  {
+    n: '4',
+    label: 'Capture',
+    img: '06-checkin-capture.png',
+    text: 'A photo anchors the entry to a real moment: the dog, the sky, the coffee.',
+  },
+];
+
+const daniRewardCards = [
+  { emoji: '⏳', title: 'More talk-time', text: 'Extend sessions when you need longer.' },
+  { emoji: '🧭', title: 'Deeper topics', text: 'Open new subjects to explore together.' },
+  { emoji: '✨', title: 'New traits', text: 'Add personality and features over time.' },
+];
+
+const daniPalette: [string, string][] = [
+  ['Dani', '#6E66A6'],
+  ['Ink', '#2A2640'],
+  ['Lavender', '#EFECFA'],
+  ['Bubble', '#E4E1F1'],
+  ['Canvas', '#FFFFFF'],
+];
+
+const daniMoodScale: [string, string, string][] = [
+  ['Excellent', '7–9 hrs', '#50A850'],
+  ['Good', '6–7 hrs', '#8DC73F'],
+  ['Fair', '5 hrs', '#F3C12D'],
+  ['Poor', '3–4 hrs', '#54B6D9'],
+  ['Worst', '<3 hrs', '#6E8FE0'],
+];
+
+const daniNextSteps: [string, string][] = [
+  ['Next: validate the ritual', 'Test the 4-step flow with real users to confirm it stays under a minute.'],
+  ['Next: close the loop', 'Show how logged mood, sleep and photos resurface as gentle insights over time.'],
+  ['Next: responsible AI', 'Define crisis hand-offs and clear limits, since Dani supports rather than diagnoses.'],
+];
+
+const DANI_PHONE_SHADOW = '0 38px 70px rgba(46, 40, 80, 0.18), 0 12px 24px rgba(46, 40, 80, 0.12)';
+const DANI_PHONE_SHADOW_SOFT = '0 24px 48px rgba(46, 40, 80, 0.14), 0 6px 14px rgba(46, 40, 80, 0.08)';
+const DANI_PHONE_RADIUS = '28px';
+const DANI_DESKTOP_RADIUS = '18px';
+
+function DaniPhone({
+  src,
+  alt,
+  className = '',
+  shadow = DANI_PHONE_SHADOW,
+  float = false,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  shadow?: string;
+  float?: boolean;
+}) {
+  return (
+    <div
+      className={`relative overflow-hidden ${float ? 'dani-float' : ''} ${className}`}
+      style={{ borderRadius: DANI_PHONE_RADIUS, boxShadow: shadow }}
+    >
+      <img
+        src={`${DANI_IMG}${src}`}
+        alt={alt}
+        loading="lazy"
+        className="block h-auto w-full object-contain"
+      />
+    </div>
+  );
+}
+
+function DaniSectionHeader({
+  eyebrow,
+  title,
+  intro,
+  align = 'left',
+}: {
+  eyebrow: string;
+  title?: string;
+  intro?: string;
+  align?: 'left' | 'center';
+}) {
+  return (
+    <header
+      className={`case-reveal mx-auto max-w-[860px] px-6 md:px-16 ${align === 'center' ? 'text-center' : ''}`}
+    >
+      <p
+        className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+        style={{ color: DANI_ACCENT }}
+      >
+        {eyebrow}
+      </p>
+      {title ? (
+        <h2
+          className="mt-5 text-[clamp(28px,4.2vw,52px)] font-semibold leading-[1.06] tracking-[-0.025em]"
+          style={{ color: DANI_INK }}
+        >
+          {title}
+        </h2>
+      ) : null}
+      {intro ? (
+        <p
+          className={`mt-6 text-[clamp(17px,1.85vw,20px)] leading-[1.6] text-[#56565b] ${
+            align === 'center' ? 'mx-auto max-w-[620px]' : 'max-w-[640px]'
+          }`}
+        >
+          {intro}
+        </p>
+      ) : null}
+    </header>
+  );
+}
+
+function DaniCaseStudy() {
+  return (
+    <article
+      className="pb-32 text-[#1d1d1f]"
+      style={{ fontFamily: APPLE_FONT_STACK, background: '#fbfaf8' }}
+    >
+      {/* ===== Hero ===== */}
+      <header className="relative overflow-hidden px-6 pt-12 md:px-16 md:pt-16">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 -z-0 h-[520px]"
+          style={{
+            background:
+              'radial-gradient(120% 70% at 78% 22%, rgba(110,102,166,0.18) 0%, rgba(110,102,166,0.06) 38%, rgba(255,255,255,0) 70%)',
+          }}
+        />
+        <div className="relative grid items-center gap-12 md:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <p
+              className="text-[11px] font-semibold uppercase tracking-[0.24em]"
+              style={{ color: DANI_ACCENT }}
+            >
+              UX / UI Case Study · Dani
+            </p>
+            <h1
+              className="mt-5 max-w-[620px] text-[clamp(30px,4.4vw,58px)] font-semibold leading-[1.04] tracking-[-0.03em]"
+              style={{ color: DANI_INK }}
+            >
+              Your mood, your day, and someone to talk to.
+            </h1>
+            <p className="mt-6 max-w-[500px] text-[clamp(15px,1.5vw,18px)] leading-[1.55] text-[#56565b]">
+              A concept app that folds mood, sleep, journaling and photos into one daily ritual,
+              with a customizable AI companion you can shape into the listener you actually need.
+            </p>
+          </div>
+          <div className="relative flex justify-center md:justify-end">
+            <DaniPhone
+              src="01-hero-welcome.png"
+              alt="Dani welcome screen"
+              float
+              className="max-w-[280px]"
+            />
+          </div>
+        </div>
+
+        <dl className="mt-16 grid grid-cols-2 gap-x-10 gap-y-8 border-t border-black/[0.08] pt-10 md:grid-cols-4">
+          {daniMeta.map(([key, value]) => (
+            <div key={key}>
+              <dt className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9b9ba2]">
+                {key}
+              </dt>
+              <dd className="mt-3 text-[15px] font-medium text-[#1d1d1f]">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      </header>
+
+      {/* ===== 01 Problem ===== */}
+      <section className="mt-32 md:mt-44">
+        <DaniSectionHeader
+          eyebrow="01 · The problem"
+          title="Your inner life is scattered across a dozen apps."
+          intro="Most wellness apps each own one tiny slice of how you feel. You bounce between them, the data never connects, and when a hard moment actually hits, none of them can hold a conversation."
+        />
+        <div className="mx-auto mt-16 grid max-w-[1080px] gap-x-12 gap-y-12 px-6 sm:grid-cols-2 md:grid-cols-4 md:px-16">
+          {daniProblemCards.map((card) => (
+            <div key={card.title} className="case-reveal">
+              <div className="text-[32px]">{card.emoji}</div>
+              <p className="mt-4 text-[17px] font-semibold tracking-[-0.005em]" style={{ color: DANI_INK }}>
+                {card.title}
+              </p>
+              <p className="mt-2 text-[15px] leading-[1.6] text-[#6e6e73]">{card.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ===== 02 Opportunity ===== */}
+      <section className="mt-32 md:mt-44">
+        <DaniSectionHeader
+          eyebrow="02 · The opportunity"
+          title="What if one space could hold all of it, and talk back?"
+        />
+        <div className="mx-auto mt-16 grid max-w-[1080px] gap-12 px-6 md:grid-cols-3 md:px-16">
+          {daniOpportunityCards.map((card) => (
+            <div key={card.n} className="case-reveal">
+              <p
+                className="text-[13px] font-semibold tracking-[0.18em]"
+                style={{ color: DANI_ACCENT }}
+              >
+                {card.n}
+              </p>
+              <p
+                className="mt-4 text-[20px] font-semibold leading-[1.25] tracking-[-0.01em]"
+                style={{ color: DANI_INK }}
+              >
+                {card.title}
+              </p>
+              <p className="mt-3 text-[15px] leading-[1.65] text-[#6e6e73]">{card.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ===== 03 Meet Dani — Onboarding ===== */}
+      <section className="mt-32 md:mt-44">
+        <div className="mx-auto grid max-w-[1180px] items-center gap-16 px-6 md:grid-cols-[0.95fr_1fr] md:gap-x-24 md:px-16">
+          <div className="case-reveal order-2 md:order-1">
+            <p
+              className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+              style={{ color: DANI_ACCENT }}
+            >
+              03 · Meet Dani
+            </p>
+            <h2
+              className="mt-5 text-[clamp(28px,3.8vw,46px)] font-semibold leading-[1.05] tracking-[-0.02em]"
+              style={{ color: DANI_INK }}
+            >
+              A friend, shaped before the first hello.
+            </h2>
+            <p className="mt-6 max-w-[500px] text-[17px] leading-[1.65] text-[#56565b]">
+              Onboarding leads with personality, not permissions. Before chatting, you tell Dani how it
+              should talk and how present it should be, so support arrives in your language from day one.
+            </p>
+            <ul className="mt-10 space-y-7">
+              {daniOnboardingItems.map((item) => (
+                <li key={item.title} className="flex gap-5">
+                  <span className="mt-1 text-[20px]">{item.emoji}</span>
+                  <div>
+                    <p className="text-[16px] font-semibold tracking-[-0.005em]" style={{ color: DANI_INK }}>
+                      {item.title}
+                    </p>
+                    <p className="mt-1.5 text-[15px] leading-[1.6] text-[#6e6e73]">{item.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="case-reveal order-1 flex justify-center md:order-2">
+            <DaniPhone
+              src="02-onboarding.png"
+              alt="Onboarding, personality and privacy"
+              className="max-w-[320px]"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 04 Daily check-in ===== */}
+      <section className="mt-32 md:mt-44">
+        <DaniSectionHeader
+          eyebrow="04 · The daily check-in"
+          title="Four small steps that capture a whole day."
+          intro="Each step is one tactile gesture: a dial, a slider, a few words, a photo. The progress pill (1 of 4) keeps it short and finishable, so the ritual sticks."
+        />
+        <div className="mx-auto mt-20 grid max-w-[1200px] gap-x-10 gap-y-16 px-6 sm:grid-cols-2 md:grid-cols-4 md:px-16">
+          {daniCheckinSteps.map((step) => (
+            <div key={step.n} className="case-reveal flex flex-col items-center text-center">
+              <DaniPhone
+                src={step.img}
+                alt={`${step.label} step`}
+                shadow={DANI_PHONE_SHADOW_SOFT}
+                className="max-w-[240px]"
+              />
+              <div className="mt-7 flex items-center gap-2">
+                <span
+                  className="text-[11px] font-semibold tracking-[0.18em]"
+                  style={{ color: DANI_ACCENT }}
+                >
+                  STEP {step.n}
+                </span>
+                <span className="text-[11px] tracking-[0.14em] text-[#c6c6cb]">·</span>
+                <span
+                  className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+                  style={{ color: DANI_INK }}
+                >
+                  {step.label}
+                </span>
+              </div>
+              <p className="mt-4 max-w-[240px] text-[14px] leading-[1.6] text-[#6e6e73]">
+                {step.text}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="case-reveal mx-auto mt-32 max-w-[920px] px-6 text-center md:mt-44 md:px-16">
+        <p
+          className="text-[clamp(26px,3.6vw,40px)] font-medium leading-[1.22] tracking-[-0.018em]"
+          style={{ color: DANI_INK }}
+        >
+          Mood, sleep, reflection, photo, captured in under a minute.
+          <span className="block text-[#9b9ba2]">
+            A ritual short enough to actually keep, deep enough to mean something.
+          </span>
+        </p>
+      </div>
+
+      {/* ===== 05 AI companion ===== */}
+      <section className="mt-32 md:mt-44">
+        <div className="mx-auto grid max-w-[1180px] items-center gap-16 px-6 md:grid-cols-[1fr_0.95fr] md:gap-x-24 md:px-16">
+          <div className="case-reveal flex justify-center">
+            <DaniPhone
+              src="07-chat-companion.png"
+              alt="Chat with Dani"
+              className="max-w-[320px]"
+            />
+          </div>
+          <div className="case-reveal">
+            <p
+              className="text-[11px] font-semibold uppercase tracking-[0.22em]"
+              style={{ color: DANI_ACCENT }}
+            >
+              05 · An AI companion you can shape
+            </p>
+            <h2
+              className="mt-5 text-[clamp(28px,3.8vw,46px)] font-semibold leading-[1.05] tracking-[-0.02em]"
+              style={{ color: DANI_INK }}
+            >
+              Talking it through, earned a little at a time.
+            </h2>
+            <p className="mt-6 max-w-[520px] text-[17px] leading-[1.65] text-[#56565b]">
+              The check-in feeds the conversation: Dani already knows you slept badly or had a heavy day,
+              so the chat opens with context, not a blank box. Rather than an endless feed, showing up
+              earns points you spend on going deeper.
+            </p>
+            <div className="mt-9 flex items-baseline justify-between border-t border-black/[0.08] pt-7">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#9b9ba2]">
+                Points unlock more of Dani
+              </p>
+              <p className="text-[14px] font-semibold" style={{ color: DANI_ACCENT }}>⭑ 530 pts</p>
+            </div>
+            <ul className="mt-7 grid gap-6 sm:grid-cols-3">
+              {daniRewardCards.map((card) => (
+                <li key={card.title}>
+                  <div className="text-[22px]">{card.emoji}</div>
+                  <p className="mt-3 text-[15px] font-semibold tracking-[-0.005em]" style={{ color: DANI_INK }}>
+                    {card.title}
+                  </p>
+                  <p className="mt-1.5 text-[13.5px] leading-[1.55] text-[#6e6e73]">{card.text}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== 06 Home base ===== */}
+      <section className="mt-32 md:mt-44">
+        <DaniSectionHeader
+          eyebrow="06 · A home that pulls it together"
+          title="Mood, habits and to-dos, side by side."
+          intro="The dashboard greets you by name, surfaces today’s mood, and nudges small habits beside a light to-do timeline. It scales from a glanceable phone home to a calm desktop overview."
+        />
+        <div className="case-reveal mx-auto mt-20 max-w-[1200px] px-6 md:px-16">
+          <div
+            className="overflow-hidden"
+            style={{ borderRadius: DANI_DESKTOP_RADIUS, boxShadow: DANI_PHONE_SHADOW }}
+          >
+            <img
+              src={`${DANI_IMG}08-dashboard-desktop.png`}
+              alt="Dani desktop dashboard"
+              loading="lazy"
+              className="block w-full"
+            />
+          </div>
+        </div>
+        <div className="case-reveal mx-auto mt-20 flex max-w-[1200px] justify-center px-6 md:px-16">
+          <DaniPhone src="09-home-mobile.png" alt="Dani mobile home" className="max-w-[300px]" />
+        </div>
+      </section>
+
+      {/* ===== 07 Visual language ===== */}
+      <section className="mt-32 md:mt-44">
+        <DaniSectionHeader
+          eyebrow="07 · Visual language"
+          title="Soft, rounded and unmistakably calm."
+        />
+
+        <div className="mx-auto mt-20 grid max-w-[1080px] gap-16 px-6 md:grid-cols-2 md:px-16">
+          <div className="case-reveal">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9b9ba2]">
+              Palette
+            </p>
+            <div className="mt-7 space-y-4">
+              {daniPalette.map(([name, hex]) => (
+                <div key={hex} className="flex items-center gap-4">
+                  <span
+                    className="h-11 w-11 rounded-[12px]"
+                    style={{
+                      background: hex,
+                      boxShadow:
+                        hex === '#FFFFFF'
+                          ? 'inset 0 0 0 1px rgba(0,0,0,0.06)'
+                          : 'inset 0 0 0 1px rgba(0,0,0,0.04)',
+                    }}
+                  />
+                  <div className="flex flex-1 items-baseline justify-between">
+                    <p className="text-[15px] font-medium" style={{ color: DANI_INK }}>{name}</p>
+                    <p className="font-mono text-[12px] tracking-wide text-[#9b9ba2]">{hex}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="case-reveal">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9b9ba2]">
+              Type
+            </p>
+            <div className="mt-7">
+              <p
+                className="text-[34px] leading-[1.05] tracking-[-0.015em]"
+                style={{ color: DANI_INK, fontFamily: '"Bricolage Grotesque", Georgia, serif' }}
+              >
+                Bricolage Grotesque
+              </p>
+              <p className="mt-2 text-[13px] uppercase tracking-[0.14em] text-[#9b9ba2]">
+                Display · headlines &amp; mood prompts
+              </p>
+            </div>
+            <div className="mt-9 border-t border-black/[0.08] pt-8">
+              <p
+                className="text-[26px] leading-[1.1]"
+                style={{ color: DANI_INK, fontFamily: '"DM Sans", -apple-system, system-ui, sans-serif' }}
+              >
+                DM Sans
+              </p>
+              <p className="mt-2 text-[13px] uppercase tracking-[0.14em] text-[#9b9ba2]">
+                Text · UI, captions &amp; reflections
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="case-reveal mx-auto mt-20 max-w-[1080px] px-6 md:px-16">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9b9ba2]">
+            Mood scale · one color story across the app
+          </p>
+          <div className="mt-7 grid gap-5 sm:grid-cols-5">
+            {daniMoodScale.map(([label, hours, color]) => (
+              <div key={label}>
+                <span
+                  className="block h-14 w-full rounded-[14px]"
+                  style={{ background: color, boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.04)' }}
+                />
+                <p className="mt-4 text-[14px] font-semibold" style={{ color: DANI_INK }}>{label}</p>
+                <p className="mt-1 text-[12.5px] text-[#9b9ba2]">{hours}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== Reflection ===== */}
+      <section className="mt-32 md:mt-44">
+        <DaniSectionHeader
+          eyebrow="Reflection &amp; next steps"
+          title="What I’d carry forward."
+        />
+        <div className="mx-auto mt-10 max-w-[760px] space-y-6 px-6 text-[17px] leading-[1.75] text-[#56565b] md:px-16">
+          <p>
+            Combining four “single-purpose” app ideas into one ritual forced a lot of hard editing. The
+            win was making each step a single gesture, so the whole check-in still feels light.
+          </p>
+          <p>
+            Framing the AI as a companion you customize and unlock, rather than an always-on chatbot,
+            kept the tone caring and gave the gamification a reason to exist beyond streaks. Prototyping
+            the front-end myself also kept those design decisions honest about what was actually buildable.
+          </p>
+        </div>
+
+        <div className="mx-auto mt-16 grid max-w-[1080px] gap-x-10 gap-y-10 px-6 md:grid-cols-3 md:px-16">
+          {daniNextSteps.map(([title, text]) => (
+            <div key={title} className="case-reveal border-t border-black/[0.08] pt-6">
+              <p className="text-[15px] font-semibold tracking-[-0.005em]" style={{ color: DANI_INK }}>
+                {title}
+              </p>
+              <p className="mt-3 text-[15px] leading-[1.65] text-[#6e6e73]">{text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <footer className="mt-32 px-6 md:mt-44 md:px-16">
+        <div className="mx-auto max-w-[760px] border-t border-black/[0.08] pt-10 text-center">
+          <p className="text-[15px] leading-[1.7] text-[#56565b]">
+            Dani isn’t a tracker, and it isn’t a therapist. It’s the in-between, a calm space that
+            listens, remembers, and grows with you, designed so the smallest day still has somewhere to land.
+          </p>
+          <p className="mt-8 text-[12px] uppercase tracking-[0.18em] text-[#9b9ba2]">
+            Dani · UX / UI Case Study · Self-initiated · 2025
+          </p>
+        </div>
+      </footer>
+    </article>
+  );
+}
+
+function WhosBlankCaseStudy() {
+  return <div className="wb-case" dangerouslySetInnerHTML={{ __html: whosBlankHtml }} />;
+}
+
+function ProjectModal({ projectId, onClose }: { projectId: string; onClose: () => void }) {
+  const project = projects.find((item) => item.id === projectId);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      className="project-modal-backdrop fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-2.5 backdrop-blur-md md:p-5"
+      role="dialog"
+      aria-modal="true"
+      aria-label={project ? `${project.title} case study` : 'Project case study'}
+      onClick={onClose}
+    >
+      <div
+        className="project-modal-panel relative flex h-[96vh] w-full max-w-[1180px] flex-col overflow-hidden rounded-[26px] bg-white text-black shadow-[0_40px_120px_rgba(0,0,0,0.45)] md:h-[94vh] md:rounded-[34px]"
+        onClick={(event) => event.stopPropagation()}
+        style={{ fontFamily: APPLE_FONT_STACK }}
+      >
+        <div className="flex shrink-0 items-center justify-between border-b border-black/[0.06] bg-white/80 px-5 py-4 backdrop-blur-xl md:px-8">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#a1a1a6]">
+              {project ? `Case ${project.id}` : 'Case study'}
+            </span>
+            {project ? (
+              <>
+                <span className="h-3.5 w-px shrink-0 bg-black/10" aria-hidden="true" />
+                <span className="flex min-w-0 items-center gap-2">
+                  <span
+                    className="h-2 w-2 shrink-0 rounded-full"
+                    style={{ backgroundColor: project.accent }}
+                    aria-hidden="true"
+                  />
+                  <span className="truncate text-[13.5px] font-semibold tracking-[-0.01em] text-[#1d1d1f]">
+                    {project.title}
+                  </span>
+                </span>
+              </>
+            ) : null}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f0f0f2] text-[#1d1d1f] transition hover:bg-[#e3e3e6]"
+          >
+            <span className="modal-x" aria-hidden="true">
+              <span />
+              <span />
+            </span>
+          </button>
+        </div>
+
+        <div className="case-scroll flex-1 overflow-y-auto overflow-x-hidden">
+          {projectId === '01' ? (
+            <PinterestCaseStudy />
+          ) : projectId === '02' ? (
+            <DaniCaseStudy />
+          ) : projectId === '03' ? (
+            <WhosBlankCaseStudy />
+          ) : (
+            <div className="px-6 py-32 text-center md:px-10">
+              <h2 className="text-[clamp(28px,4vw,44px)] font-semibold tracking-[-0.01em] text-[#1d1d1f]">
+                {project?.title}
+              </h2>
+              <p className="mx-auto mt-4 max-w-[440px] text-[16px] leading-[1.5] text-[#6e6e73]">
+                Full case study coming soon.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
