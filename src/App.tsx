@@ -518,7 +518,7 @@ export default function App() {
     // The cue is a gentle "you can scroll" reminder: it only surfaces after the
     // visitor has been idle for a while, shows for a few seconds, fades out, and
     // re-appears on the next idle stretch. Any real scroll dismisses it instantly.
-    const IDLE_DELAY = 10000;
+    const IDLE_DELAY = 5000;
     const VISIBLE_DURATION = 3000;
     let idleTimer = 0;
     let hideTimer = 0;
@@ -1794,8 +1794,6 @@ function DecorativeProjectCard({
 }
 
 function ProjectPlaceholder({ project, index }: { project: Project; index: number }) {
-  const lineCount = index % 2 === 0 ? 4 : 3;
-
   if (project.thumb) {
     const isDesktop = project.thumbType === 'desktop';
 
@@ -1857,60 +1855,71 @@ function ProjectPlaceholder({ project, index }: { project: Project; index: numbe
     );
   }
 
+  const [coverName, coverCategory] = project.title.split('—').map((part) => part.trim());
+  const coverTags = (coverCategory ?? 'Case Study').split(' ').slice(0, 2);
+
   return (
     <div
       className="relative h-full w-full overflow-hidden"
       style={{
-        background: `linear-gradient(135deg, #ffffff 0%, #f2f2f0 45%, ${project.accent} 140%)`,
+        background: `linear-gradient(157deg, #ffffff 0%, #efefec 60%, ${project.accent} 215%)`,
       }}
     >
-      <div className="absolute left-[7%] right-[7%] top-[7%] flex items-center justify-between text-[10px] font-medium uppercase tracking-[0.08em] text-[#8a8a8a]">
-        <span>{project.title}</span>
+      {/* meta row */}
+      <div className="absolute left-[8%] right-[8%] top-[8%] z-10 flex items-center justify-between text-[10px] font-medium uppercase tracking-[0.1em] text-[#9a9a9a]">
+        <span className="truncate pr-2">{coverCategory ?? 'Case Study'}</span>
         <span>{project.year}</span>
       </div>
 
+      {/* soft accent arc */}
       <div
-        className="absolute rounded-full opacity-80 blur-[2px]"
+        className="absolute rounded-full"
         style={{
-          width: '44%',
+          width: '60%',
           aspectRatio: '1 / 1',
-          left: `${18 + index * 4}%`,
-          top: `${22 + (index % 3) * 7}%`,
-          background: `radial-gradient(circle at 35% 30%, #ffffff 0%, ${project.accent} 48%, #111111 130%)`,
+          right: '-16%',
+          top: `${-10 + (index % 3) * 4}%`,
+          background: `radial-gradient(circle at 32% 30%, #ffffff 0%, ${project.accent} 56%, #2b2b2b 150%)`,
+          opacity: 0.4,
         }}
       />
+      {/* thin ring detail */}
       <div
-        className="absolute rounded-[999px] bg-black/70"
+        className="absolute rounded-full border-[5px] border-black/[0.12]"
         style={{
-          width: '34%',
-          height: '7%',
-          left: index % 2 === 0 ? '54%' : '12%',
-          top: index % 2 === 0 ? '49%' : '58%',
-        }}
-      />
-      <div
-        className="absolute rounded-[999px] bg-white/90"
-        style={{
-          width: '28%',
-          height: '6%',
-          left: index % 2 === 0 ? '10%' : '58%',
-          top: index % 2 === 0 ? '74%' : '28%',
-          boxShadow: '0 10px 28px rgba(0,0,0,0.08)',
+          width: '17%',
+          aspectRatio: '1 / 1',
+          right: '18%',
+          top: index % 2 === 0 ? '36%' : '30%',
         }}
       />
 
-      <div className="absolute bottom-[10%] left-[8%] right-[8%]">
-        <div className="mb-5 h-px w-full bg-black/10" />
-        {Array.from({ length: lineCount }).map((_, lineIndex) => (
-          <div
-            key={lineIndex}
-            className="mb-2 h-[6px] rounded-full bg-black/[0.12]"
-            style={{ width: `${82 - lineIndex * 14}%` }}
-          />
-        ))}
+      {/* hero name */}
+      <div className="absolute bottom-[31%] left-[8%] right-[10%]">
+        <h4
+          className="font-semibold leading-[0.94] tracking-[-0.03em] text-[#1d1d1f]"
+          style={{ fontFamily: APPLE_FONT_STACK, fontSize: 'clamp(22px,3.4vw,40px)' }}
+        >
+          {coverName}
+        </h4>
       </div>
 
-      <div className="absolute bottom-[7%] right-[7%] text-[11px] text-[#606060]">
+      {/* baseline: rule + discipline tags */}
+      <div className="absolute bottom-[12%] left-[8%] right-[8%]">
+        <div className="h-px w-full bg-black/[0.12]" />
+        <div className="mt-3.5 flex flex-wrap gap-1.5">
+          {coverTags.map((tag) => (
+            <span
+              key={tag}
+              className="rounded-full border border-black/[0.14] px-2.5 py-[3px] text-[9px] font-medium uppercase tracking-[0.08em] text-[#8a8a8a]"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="absolute bottom-[7%] right-[7%] text-[11px] text-[#9a9a9a]">
         @{project.id}
       </div>
     </div>
