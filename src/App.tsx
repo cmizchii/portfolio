@@ -1600,6 +1600,24 @@ function PortfolioDetails() {
             shimaa.j.nur@gmail.com
           </button>
 
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-1 text-[15px] font-medium md:mt-10">
+            <a
+              href="/resume.html"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex min-h-[44px] items-center border-b border-current pb-0.5 transition hover:opacity-55"
+            >
+              Résumé
+            </a>
+            <a
+              href="/Shaimaa_Jamal_Nur_Resume.pdf"
+              download
+              className="inline-flex min-h-[44px] items-center text-[#1d1d1f] transition hover:opacity-55"
+            >
+              Download PDF ↓
+            </a>
+          </div>
+
           <div className="mt-20 grid gap-x-12 gap-y-10 text-[15px] font-medium leading-[1.35] text-[#1d1d1f] sm:grid-cols-2 md:mt-44 lg:grid-cols-4">
             <div>
               <p className="mb-4 text-[12px] font-semibold uppercase tracking-[0.14em] text-black/45">Phone</p>
