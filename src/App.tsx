@@ -1437,6 +1437,7 @@ function AboutContent({ progress }: { progress: number }) {
 function PortfolioDetails() {
   const [openQuestion, setOpenQuestion] = useState(-1);
   const [openService, setOpenService] = useState(-1);
+  const [contactOpen, setContactOpen] = useState(false);
 
   return (
     <>
@@ -1590,13 +1591,14 @@ function PortfolioDetails() {
             Get in touch
           </h2>
 
-          <a
-            href="mailto:shimaa.j.nur@gmail.com"
-            className="footer-email-link mt-12 inline-block border-b border-current pb-2 text-[clamp(26px,4.2vw,54px)] font-medium leading-none tracking-[0] md:mt-16"
+          <button
+            type="button"
+            onClick={() => setContactOpen(true)}
+            className="footer-email-link mt-12 inline-block cursor-pointer appearance-none border-b border-current bg-transparent pb-2 text-left text-[clamp(26px,4.2vw,54px)] font-medium leading-none tracking-[0] md:mt-16"
             style={{ fontFamily: APPLE_FONT_STACK }}
           >
             shimaa.j.nur@gmail.com
-          </a>
+          </button>
 
           <div className="mt-20 grid gap-x-12 gap-y-10 text-[15px] font-medium leading-[1.35] text-[#1d1d1f] sm:grid-cols-2 md:mt-44 lg:grid-cols-4">
             <div>
@@ -1622,6 +1624,10 @@ function PortfolioDetails() {
           </div>
         </div>
       </footer>
+
+      {contactOpen ? (
+        <ContactModal email="shimaa.j.nur@gmail.com" onClose={() => setContactOpen(false)} />
+      ) : null}
     </>
   );
 }
@@ -3286,6 +3292,195 @@ function CosmeticsGrowthCaseStudy() {
 
 function PortfolioCaseStudy() {
   return <div className="pf-case" dangerouslySetInnerHTML={{ __html: portfolioCaseHtml }} />;
+}
+
+const CONTACT_NEED = ['Design', 'Build', 'Design + build', 'Not sure yet'];
+const CONTACT_TYPE = ['Website', 'Web app', 'Mobile app', 'Branding', 'Other'];
+const CONTACT_BUDGET = ['Under $1k', '$1k–3k', '$3k–8k', '$8k+', 'Not sure'];
+const CONTACT_TIMELINE = ['ASAP', '2–4 weeks', '1–2 months', 'Flexible'];
+
+function ChipGroup({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: string[];
+  value: string;
+  onChange: (next: string) => void;
+}) {
+  return (
+    <div>
+      <p className="mb-2.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#86868b]">{label}</p>
+      <div className="flex flex-wrap gap-2">
+        {options.map((option) => {
+          const selected = value === option;
+
+          return (
+            <button
+              key={option}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => onChange(selected ? '' : option)}
+              className={`rounded-full border px-3.5 py-2 text-[13.5px] font-medium transition duration-200 ${
+                selected
+                  ? 'border-[#1d1d1f] bg-[#1d1d1f] text-white'
+                  : 'border-black/15 text-[#1d1d1f] hover:border-black/40'
+              }`}
+            >
+              {option}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ContactModal({ email, onClose }: { email: string; onClose: () => void }) {
+  const [need, setNeed] = useState('');
+  const [projectType, setProjectType] = useState('');
+  const [budget, setBudget] = useState('');
+  const [timeline, setTimeline] = useState('');
+  const [name, setName] = useState('');
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [onClose]);
+
+  const buildMailto = () => {
+    const subjectBits = [need, projectType].filter(Boolean).join(' · ');
+    const subject = `New project inquiry${subjectBits ? ` — ${subjectBits}` : ''}`;
+    const intro =
+      need || projectType
+        ? `I'm interested in ${need ? need.toLowerCase() : 'working with you'}${
+            projectType ? ` for a ${projectType.toLowerCase()}` : ''
+          }.`
+        : "I'd love to talk about a project.";
+    const lines = [
+      'Hi Shaimaa,',
+      '',
+      intro,
+      budget ? `Budget: ${budget}` : '',
+      timeline ? `Timeline: ${timeline}` : '',
+      message ? `\n${message}` : '',
+      '',
+      name ? `— ${name}` : '',
+    ].filter((line) => line !== '');
+
+    return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join('\n'))}`;
+  };
+
+  const submit = () => {
+    window.location.href = buildMailto();
+    onClose();
+  };
+
+  const inputClass =
+    'w-full rounded-[14px] border border-black/[0.12] bg-[#fafafa] px-4 py-3 text-[14.5px] text-[#1d1d1f] outline-none transition placeholder:text-[#a1a1a6] focus:border-black/40 focus:bg-white';
+
+  return (
+    <div
+      className="project-modal-backdrop fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4 backdrop-blur-md"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Start a project"
+      onClick={onClose}
+    >
+      <div
+        className="project-modal-panel relative flex max-h-[92vh] w-full max-w-[540px] flex-col overflow-hidden rounded-[28px] bg-white text-black shadow-[0_40px_120px_rgba(0,0,0,0.4)]"
+        onClick={(event) => event.stopPropagation()}
+        style={{ fontFamily: APPLE_FONT_STACK }}
+      >
+        <div className="flex items-start justify-between gap-4 px-6 pt-6 md:px-8 md:pt-8">
+          <div>
+            <h2 className="text-[clamp(22px,3vw,26px)] font-semibold tracking-[-0.02em] text-[#1d1d1f]">
+              Start a project
+            </h2>
+            <p className="mt-1.5 text-[14.5px] leading-[1.45] text-[#6e6e73]">
+              A few quick taps and your email writes itself.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f0f0f2] text-[#1d1d1f] transition hover:bg-[#e3e3e6]"
+          >
+            <span className="modal-x" aria-hidden="true">
+              <span />
+              <span />
+            </span>
+          </button>
+        </div>
+
+        <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6 md:px-8">
+          <ChipGroup label="What do you need" options={CONTACT_NEED} value={need} onChange={setNeed} />
+          <ChipGroup label="Project type" options={CONTACT_TYPE} value={projectType} onChange={setProjectType} />
+          <ChipGroup label="Budget" options={CONTACT_BUDGET} value={budget} onChange={setBudget} />
+          <ChipGroup label="Timeline" options={CONTACT_TIMELINE} value={timeline} onChange={setTimeline} />
+
+          <div className="grid gap-4">
+            <div>
+              <label htmlFor="contact-name" className="mb-2.5 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[#86868b]">
+                Your name
+              </label>
+              <input
+                id="contact-name"
+                type="text"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder="Jane Doe"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label htmlFor="contact-message" className="mb-2.5 block text-[12px] font-semibold uppercase tracking-[0.14em] text-[#86868b]">
+                Anything else <span className="font-medium normal-case tracking-normal text-[#a1a1a6]">(optional)</span>
+              </label>
+              <textarea
+                id="contact-message"
+                value={message}
+                onChange={(event) => setMessage(event.target.value)}
+                placeholder="A sentence or two about the idea…"
+                rows={3}
+                className={`${inputClass} resize-none`}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-black/[0.06] bg-white/80 px-6 py-5 backdrop-blur-xl md:px-8">
+          <button
+            type="button"
+            onClick={submit}
+            className="w-full rounded-full bg-[#1d1d1f] py-3.5 text-[15px] font-semibold text-white transition hover:bg-black"
+          >
+            Compose email →
+          </button>
+          <p className="mt-3 text-center text-[13px] text-[#86868b]">
+            or{' '}
+            <a href={`mailto:${email}`} className="font-medium text-[#1d1d1f] underline underline-offset-2">
+              email me directly
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function ProjectModal({ projectId, onClose }: { projectId: string; onClose: () => void }) {
