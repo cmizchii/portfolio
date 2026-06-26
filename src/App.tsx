@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import shimMemojiVideo from '../images/memoji.mp4';
 import whosBlankHtml from './whosBlank.html?raw';
 import cosmeticsGrowthHtml from './cosmeticsGrowth.html?raw';
+import portfolioCaseHtml from './portfolioCase.html?raw';
 
 type Tag = { text: string; color: string; top: string; left: string };
 type Viewport = { width: number; height: number };
 type CursorTag = { id: number; x: number; y: number; tagIndex: number; rotation: number };
-type ScrollCueState = { visible: boolean; active: boolean; progress: number };
 type Project = {
   id: string;
   title: string;
@@ -407,10 +407,12 @@ const projects: Project[] = [
   },
   {
     id: '05',
-    title: 'Signal Grid',
-    year: '2024',
-    description: 'System interface study with modular panels, comparison states, and visual hierarchy.',
-    accent: '#5dddc8',
+    title: 'This Portfolio',
+    year: '2026',
+    description: 'The making of this site, the cursor-drawing canvas, the inquiry flow, and the small interactions you are using right now.',
+    accent: '#0B0B0B',
+    thumb: '/projects/portfolio/3161ffc8-19a8-42a2-bfc8-a2ef43f5309d.png',
+    thumbType: 'desktop',
     position: { left: '14vw', top: '72%', width: 'min(18vw, 255px)', height: 'min(14vw, 205px)' },
     focusOffset: { xVw: 1, yVh: -6 },
     start: 0,
@@ -421,8 +423,8 @@ const projects: Project[] = [
 const decorativeProjects: Project[] = [
   {
     id: '06',
-    title: 'Orbit',
-    year: '2023',
+    title: 'Halcyon — Brand System',
+    year: '2024',
     description: '',
     accent: '#e7e7e7',
     position: { left: '7%', top: '-20%', width: 'min(17vw, 245px)', height: 'min(13vw, 190px)' },
@@ -431,7 +433,7 @@ const decorativeProjects: Project[] = [
   },
   {
     id: '07',
-    title: 'Halo',
+    title: 'Cobalt — Mobile App',
     year: '2023',
     description: '',
     accent: '#f2b8ff',
@@ -441,8 +443,8 @@ const decorativeProjects: Project[] = [
   },
   {
     id: '08',
-    title: 'Field',
-    year: '2022',
+    title: 'Meridian — Editorial',
+    year: '2023',
     description: '',
     accent: '#bdebdc',
     position: { right: '28%', bottom: '-23%', width: 'min(21vw, 300px)', height: 'min(18vw, 250px)' },
@@ -494,11 +496,7 @@ export default function App() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [viewport, setViewport] = useState<Viewport>(() => getViewport());
   const [cursorTags, setCursorTags] = useState<CursorTag[]>([]);
-  const [scrollCue, setScrollCue] = useState<ScrollCueState>({
-    visible: true,
-    active: false,
-    progress: 0,
-  });
+  const [scrollCueVisible, setScrollCueVisible] = useState(false);
   const scrollRef = useRef<HTMLElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollProgressRef = useRef(0);
@@ -517,55 +515,51 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    let frame = 0;
-    let idleTimeout = 0;
+    // The cue is a gentle "you can scroll" reminder: it only surfaces after the
+    // visitor has been idle for a while, shows for a few seconds, fades out, and
+    // re-appears on the next idle stretch. Any real scroll dismisses it instantly.
+    const IDLE_DELAY = 10000;
+    const VISIBLE_DURATION = 3000;
+    let idleTimer = 0;
+    let hideTimer = 0;
 
-    const getPageProgress = () => {
-      const scrollMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      return clamp(window.scrollY / scrollMax);
+    const hasMoreToScroll = () => {
+      const scrollMax = document.documentElement.scrollHeight - window.innerHeight;
+      return scrollMax > 80 && window.scrollY < scrollMax - 96;
     };
 
-    const updateCue = (active: boolean) => {
-      frame = 0;
-      const scrollMax = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      const progress = getPageProgress();
-      const visible = scrollMax > 80 && window.scrollY < scrollMax - 96;
-
-      setScrollCue((current) => {
-        if (
-          current.visible === visible &&
-          current.active === active &&
-          Math.abs(current.progress - progress) < 0.002
-        ) {
-          return current;
-        }
-
-        return { visible, active, progress };
-      });
+    const scheduleShow = () => {
+      window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(show, IDLE_DELAY);
     };
 
-    const requestCueUpdate = (active: boolean) => {
-      if (frame) cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => updateCue(active));
+    const show = () => {
+      // Nothing left to scroll to — skip this round and try again later.
+      if (!hasMoreToScroll()) {
+        scheduleShow();
+        return;
+      }
+
+      setScrollCueVisible(true);
+      hideTimer = window.setTimeout(() => {
+        setScrollCueVisible(false);
+        scheduleShow();
+      }, VISIBLE_DURATION);
     };
 
     const onScroll = () => {
-      requestCueUpdate(true);
-      window.clearTimeout(idleTimeout);
-      idleTimeout = window.setTimeout(() => updateCue(false), 620);
+      setScrollCueVisible(false);
+      window.clearTimeout(hideTimer);
+      scheduleShow();
     };
 
-    const onResize = () => requestCueUpdate(false);
-
-    updateCue(false);
+    scheduleShow();
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onResize);
 
     return () => {
       window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onResize);
-      window.clearTimeout(idleTimeout);
-      cancelAnimationFrame(frame);
+      window.clearTimeout(idleTimer);
+      window.clearTimeout(hideTimer);
     };
   }, []);
 
@@ -761,24 +755,15 @@ export default function App() {
       </main>
 
       <ProjectsSection />
-      <ScrollCue {...scrollCue} />
+      <ScrollCue visible={scrollCueVisible} />
     </>
   );
 }
 
-function ScrollCue({ visible, active, progress }: ScrollCueState) {
+function ScrollCue({ visible }: { visible: boolean }) {
   return (
-    <div
-      className={`scroll-cue ${visible ? 'is-visible' : ''} ${active ? 'is-scrolling' : ''}`}
-      style={
-        {
-          '--scroll-progress': progress,
-        } as React.CSSProperties
-      }
-      aria-hidden="true"
-    >
+    <div className={`scroll-cue ${visible ? 'is-visible' : ''}`} aria-hidden="true">
       <span className="scroll-cue-mouse">
-        <span className="scroll-cue-progress" />
         <span className="scroll-cue-dot" />
       </span>
     </div>
@@ -3290,6 +3275,10 @@ function CosmeticsGrowthCaseStudy() {
   return <div className="cg-case" dangerouslySetInnerHTML={{ __html: cosmeticsGrowthHtml }} />;
 }
 
+function PortfolioCaseStudy() {
+  return <div className="pf-case" dangerouslySetInnerHTML={{ __html: portfolioCaseHtml }} />;
+}
+
 function ProjectModal({ projectId, onClose }: { projectId: string; onClose: () => void }) {
   const project = projects.find((item) => item.id === projectId);
 
@@ -3364,6 +3353,8 @@ function ProjectModal({ projectId, onClose }: { projectId: string; onClose: () =
             <WhosBlankCaseStudy />
           ) : projectId === '04' ? (
             <CosmeticsGrowthCaseStudy />
+          ) : projectId === '05' ? (
+            <PortfolioCaseStudy />
           ) : (
             <div className="px-6 py-32 text-center md:px-10">
               <h2 className="text-[clamp(28px,4vw,44px)] font-semibold tracking-[-0.01em] text-[#1d1d1f]">
