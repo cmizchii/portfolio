@@ -564,10 +564,12 @@
   transform: translate3d(0, 0, 0);
 }
 
-@media (max-width: 767px) {
-  .project-card {
-    width: clamp(180px, 56vw, 260px) !important;
-    height: clamp(190px, 60vw, 280px) !important;
+/* Decorative floating tags overflow and crowd small screens, and their
+   cursor interaction is disabled on touch anyway — hide them on phones/tablets.
+   (Matches the JS useIsMobile breakpoint that swaps in the simplified layout.) */
+@media (max-width: 900px) {
+  .bump-tag {
+    display: none !important;
   }
 }
 

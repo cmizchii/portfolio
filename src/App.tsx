@@ -1015,7 +1015,108 @@ function SecondScreen({ progress }: { progress: number }) {
   );
 }
 
+function useIsMobile(query = '(max-width: 900px)') {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(query).matches,
+  );
+
+  useEffect(() => {
+    const mql = window.matchMedia(query);
+    const onChange = () => setIsMobile(mql.matches);
+    onChange();
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
+  }, [query]);
+
+  return isMobile;
+}
+
+function MobileProjects({ onOpenProject }: { onOpenProject: (id: string) => void }) {
+  return (
+    <section className="bg-white px-5 pb-16 pt-20 text-black" aria-label="Selected work">
+      <div className="mx-auto max-w-[520px]">
+        <h2
+          className="text-[clamp(40px,13vw,60px)] font-medium leading-none tracking-[0]"
+          style={{ fontFamily: APPLE_FONT_STACK }}
+        >
+          MY WORK
+        </h2>
+        <p className="mt-5 max-w-[420px] text-[16px] leading-[1.4] text-[#626262]">
+          From research to final pixel, every project here is a full design process, not just a pretty screen.
+        </p>
+
+        <div className="mt-10 space-y-9">
+          {projects.map((project, index) => (
+            <button
+              key={project.id}
+              type="button"
+              onClick={() => onOpenProject(project.id)}
+              className="block w-full text-left"
+              aria-label={`Open ${project.title} case study`}
+            >
+              <div
+                className="relative aspect-[4/3] w-full overflow-hidden rounded-[18px]"
+                style={{ boxShadow: '0 14px 40px rgba(0,0,0,0.10)' }}
+              >
+                <ProjectPlaceholder project={project} index={index} />
+              </div>
+              <div className="mt-3.5 flex items-baseline justify-between gap-4">
+                <h3 className="text-[19px] font-medium leading-none tracking-[0]">{project.title}</h3>
+                <span className="shrink-0 text-[13px] leading-none text-[#888]">{project.year}</span>
+              </div>
+              <p className="mt-2 text-[14px] leading-[1.45] text-[#666]">{project.description}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MobileAbout() {
+  return (
+    <section className="bg-white px-5 pb-20 pt-10 text-black" aria-label="About">
+      <div className="mx-auto max-w-[520px]">
+        <h2
+          className="text-[clamp(34px,10.5vw,52px)] font-medium leading-[1.04] tracking-[-0.01em]"
+          style={{ fontFamily: APPLE_FONT_STACK }}
+        >
+          im shim, a designer who also codes.
+        </h2>
+
+        <div className="mt-10 grid gap-4">
+          {capabilityCards.map((card, index) => (
+            <article
+              key={card.title}
+              className="relative overflow-hidden rounded-[22px] bg-[#f6f6f7] p-6"
+              style={{ fontFamily: APPLE_FONT_STACK }}
+            >
+              <p className="text-[13px] font-semibold text-[#1d1d1f]">{card.eyebrow}</p>
+              <h3 className="mt-3 text-[21px] font-semibold leading-[1.1] tracking-[0]">{card.title}</h3>
+              <p className="mt-2.5 text-[14.5px] leading-[1.45] text-[#4f4f55]">{card.text}</p>
+              <div
+                className="about-card-symbol mt-5 font-semibold leading-none tracking-[-0.04em]"
+                style={
+                  {
+                    fontSize: card.visualSize,
+                    '--symbol-gradient-start': `${index * 18}%`,
+                    '--symbol-gradient-end': `${index * 18 + 38}%`,
+                    '--symbol-gradient-delay': `${index * -1.35}s`,
+                  } as React.CSSProperties
+                }
+              >
+                {card.visual}
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ProjectsSection() {
+  const isMobile = useIsMobile();
   const [projectProgress, setProjectProgress] = useState(0);
   const [aboutProgress, setAboutProgress] = useState(0);
   const [activeProject, setActiveProject] = useState<string | null>(null);
@@ -1112,6 +1213,13 @@ function ProjectsSection() {
       className="relative bg-white text-black"
       aria-label="Selected projects and about"
     >
+      {isMobile ? (
+        <>
+          <MobileProjects onOpenProject={setOpenProjectId} />
+          <MobileAbout />
+        </>
+      ) : (
+      <>
       <div ref={projectStageRef} className="relative h-[260vh] md:h-[460vh]">
         <div
           className="sticky top-0 h-[100dvh] overflow-hidden md:h-screen"
@@ -1186,6 +1294,8 @@ function ProjectsSection() {
           <AboutContent progress={aboutProgress} />
         </div>
       </div>
+      </>
+      )}
 
       <PortfolioDetails />
 
