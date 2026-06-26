@@ -1618,7 +1618,7 @@ function PortfolioDetails() {
             </a>
           </div>
 
-          <div className="mt-20 grid gap-x-12 gap-y-10 text-[15px] font-medium leading-[1.35] text-[#1d1d1f] sm:grid-cols-2 md:mt-44 lg:grid-cols-4">
+          <div className="mt-20 grid gap-x-12 gap-y-10 text-[15px] font-medium leading-[1.35] text-[#1d1d1f] sm:grid-cols-2 md:mt-44 lg:grid-cols-5">
             <div>
               <p className="mb-4 text-[12px] font-semibold uppercase tracking-[0.14em] text-black/45">Phone</p>
               <a className="inline-flex min-h-[44px] items-center transition hover:opacity-55" href="tel:+19402386273">
@@ -1633,6 +1633,12 @@ function PortfolioDetails() {
               <p className="mb-4 text-[12px] font-semibold uppercase tracking-[0.14em] text-black/45">GitHub</p>
               <a className="inline-flex min-h-[44px] items-center transition hover:opacity-55" href="https://github.com/cmizchii" target="_blank" rel="noreferrer">
                 @cmizchii
+              </a>
+            </div>
+            <div>
+              <p className="mb-4 text-[12px] font-semibold uppercase tracking-[0.14em] text-black/45">LinkedIn</p>
+              <a className="inline-flex min-h-[44px] items-center transition hover:opacity-55" href="https://www.linkedin.com/in/shaimaajamal" target="_blank" rel="noreferrer">
+                in/shaimaajamal
               </a>
             </div>
             <div>
