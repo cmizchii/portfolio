@@ -98,8 +98,6 @@ const CURSOR_TRAIL_LIMIT = 16;
 const ABOUT_TEXT_PARTS = ['im', 'shim', 'a', 'designer', 'who', 'also', 'codes'];
 const ABOUT_TEXT_REVEAL_STARTS = [0.08, 0.14, 0.3, 0.38, 0.48, 0.57, 0.66];
 const ABOUT_VIDEO_REVEAL_START = 0.22;
-const ABOUT_VIDEO_SCROLL_START = 0.02;
-const ABOUT_VIDEO_SCROLL_END = 0.92;
 const projectMotionProfiles: ProjectMotion[] = [
   {
     riseStart: 0.02,
@@ -1309,18 +1307,11 @@ function ProjectsSection() {
 function AboutContent({ progress }: { progress: number }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoWrapRef = useRef<HTMLSpanElement>(null);
-  const videoFrameRef = useRef(0);
-  const videoTargetTimeRef = useRef(0);
-  const [isVideoVisible, setIsVideoVisible] = useState(false);
   const horizontalProgress = progressBetween(progress, 0, 0.92);
   const verticalProgress = easeInOut(progressBetween(progress, 0.2, 0.94));
   const videoRevealProgress = easeOut(
     progressBetween(horizontalProgress, ABOUT_VIDEO_REVEAL_START, ABOUT_VIDEO_REVEAL_START + 0.16),
   );
-  const videoScrollProgress = easeInOut(
-    progressBetween(horizontalProgress, ABOUT_VIDEO_SCROLL_START, ABOUT_VIDEO_SCROLL_END),
-  );
-  const videoScrubProgress = Math.round(videoScrollProgress * 240) / 240;
   const textSettleProgress = easeInOut(progressBetween(progress, 0.62, 0.98));
   const textExitProgress = easeInOut(progressBetween(progress, 0.72, 1));
   const cardsGroupProgress = easeSoft(progressBetween(progress, 0.48, 0.68));
@@ -1331,11 +1322,15 @@ function AboutContent({ progress }: { progress: number }) {
     const videoWrap = videoWrapRef.current;
     if (!video || !videoWrap) return;
 
-    video.pause();
-
+    // Let the memoji play on its own smooth loop — scroll only reveals it.
+    // Play only while it's on screen to avoid wasting resources.
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setIsVideoVisible(Boolean(entry?.isIntersecting));
+        if (entry?.isIntersecting) {
+          void video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
       },
       { rootMargin: '0px 0px -8% 0px', threshold: 0.02 },
     );
@@ -1347,55 +1342,6 @@ function AboutContent({ progress }: { progress: number }) {
       video.pause();
     };
   }, []);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const setTargetTime = () => {
-      const duration = Number.isFinite(video.duration) ? video.duration : 0;
-      if (!duration) return false;
-
-      videoTargetTimeRef.current = duration * videoScrubProgress;
-      return true;
-    };
-
-    const smoothToTarget = () => {
-      videoFrameRef.current = 0;
-      video.pause();
-
-      if (!isVideoVisible) return;
-
-      const targetTime = videoTargetTimeRef.current;
-      const delta = targetTime - video.currentTime;
-
-      if (Math.abs(delta) < 0.018) {
-        video.currentTime = targetTime;
-        return;
-      }
-
-      video.currentTime += delta * 0.18;
-      videoFrameRef.current = requestAnimationFrame(smoothToTarget);
-    };
-
-    const requestSmooth = () => {
-      cancelAnimationFrame(videoFrameRef.current);
-
-      if (isVideoVisible && setTargetTime()) {
-        videoFrameRef.current = requestAnimationFrame(smoothToTarget);
-      } else {
-        video.pause();
-      }
-    };
-
-    requestSmooth();
-    video.addEventListener('loadedmetadata', requestSmooth);
-
-    return () => {
-      video.removeEventListener('loadedmetadata', requestSmooth);
-      cancelAnimationFrame(videoFrameRef.current);
-    };
-  }, [isVideoVisible, videoScrubProgress]);
 
   return (
     <div className="pointer-events-none absolute inset-0 z-50 px-5" aria-label="About">
@@ -1457,6 +1403,8 @@ function AboutContent({ progress }: { progress: number }) {
                     src={shimMemojiVideo}
                     className="h-[282%] w-[305%] -translate-x-[2.5%] -translate-y-[1%] object-contain"
                     muted
+                    loop
+                    autoPlay
                     playsInline
                     preload="auto"
                     aria-hidden="true"
