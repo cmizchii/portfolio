@@ -1033,7 +1033,7 @@ function useIsMobile(query = '(max-width: 900px)') {
 
 function MobileProjects({ onOpenProject }: { onOpenProject: (id: string) => void }) {
   return (
-    <section className="bg-white px-5 pb-16 pt-20 text-black" aria-label="Selected work">
+    <section id="work" className="bg-white px-5 pb-16 pt-20 text-black" aria-label="Selected work">
       <div className="mx-auto max-w-[520px]">
         <h2
           className="text-[clamp(40px,13vw,60px)] font-medium leading-none tracking-[0]"
@@ -1220,7 +1220,7 @@ function ProjectsSection() {
         </>
       ) : (
       <>
-      <div ref={projectStageRef} className="relative h-[260vh] md:h-[460vh]">
+      <div id="work" ref={projectStageRef} className="relative h-[260vh] md:h-[460vh]">
         <div
           className="sticky top-0 h-[100dvh] overflow-hidden md:h-screen"
           onMouseMove={(event) => updateActiveProject(event.clientX, event.clientY)}
@@ -1544,6 +1544,14 @@ function AboutContent({ progress }: { progress: number }) {
   );
 }
 
+function scrollToSection(id: string) {
+  if (id === 'top') {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 function PortfolioDetails() {
   const [openQuestion, setOpenQuestion] = useState(-1);
   const [openService, setOpenService] = useState(-1);
@@ -1552,6 +1560,7 @@ function PortfolioDetails() {
   return (
     <>
       <section
+        id="services"
         className="service-transition-section relative overflow-hidden bg-[#f5f5f7] px-3 py-9 text-black md:px-6 md:py-14"
         aria-label="Services"
       >
@@ -1624,7 +1633,7 @@ function PortfolioDetails() {
         </div>
       </section>
 
-      <section className="deferred-section reveal-section relative bg-white px-5 pb-14 pt-[92px] text-black md:px-10 md:pb-20 md:pt-[132px]" aria-label="Questions">
+      <section id="questions" className="deferred-section reveal-section relative bg-white px-5 pb-14 pt-[92px] text-black md:px-10 md:pb-20 md:pt-[132px]" aria-label="Questions">
         <div className="mx-auto max-w-[1180px]">
           <div className="reveal-copy flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
@@ -1694,6 +1703,34 @@ function PortfolioDetails() {
 
       <footer id="contact" className="deferred-section bg-white px-5 pb-16 pt-28 text-black md:px-10 md:pb-24 md:pt-32" aria-label="Footer contact">
         <div className="mx-auto max-w-[1180px]">
+          <nav
+            aria-label="Footer navigation"
+            className="mb-16 flex flex-wrap items-center justify-between gap-x-8 gap-y-4 border-b border-black/10 pb-7 text-[12.5px] font-semibold uppercase tracking-[0.16em] text-black/50 md:mb-24"
+          >
+            <div className="flex flex-wrap gap-x-7 gap-y-3">
+              <button type="button" onClick={() => scrollToSection('work')} className="transition hover:text-black">
+                Work
+              </button>
+              <button type="button" onClick={() => scrollToSection('services')} className="transition hover:text-black">
+                Services
+              </button>
+              <button type="button" onClick={() => scrollToSection('questions')} className="transition hover:text-black">
+                Questions
+              </button>
+              <button type="button" onClick={() => setContactOpen(true)} className="transition hover:text-black">
+                Start a project
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => scrollToSection('top')}
+              className="inline-flex items-center gap-2 transition hover:text-black"
+            >
+              Back to top
+              <span aria-hidden="true">↑</span>
+            </button>
+          </nav>
+
           <h2
             className="text-[clamp(54px,10vw,142px)] font-semibold uppercase leading-[0.88] tracking-[0]"
             style={{ fontFamily: APPLE_FONT_STACK }}
@@ -1710,21 +1747,22 @@ function PortfolioDetails() {
             shimaa.j.nur@gmail.com
           </button>
 
-          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-1 text-[15px] font-medium md:mt-10">
+          <div className="mt-9 flex flex-wrap items-center gap-3 md:mt-12">
             <a
               href="/resume.html"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex min-h-[44px] items-center border-b border-current pb-0.5 transition hover:opacity-55"
+              className="inline-flex min-h-[48px] items-center rounded-full bg-[#1d1d1f] px-6 text-[15px] font-semibold text-white transition hover:bg-black"
             >
-              Résumé
+              View résumé
             </a>
             <a
               href="/Shaimaa_Jamal_Nur_Resume.pdf"
               download
-              className="inline-flex min-h-[44px] items-center text-[#1d1d1f] transition hover:opacity-55"
+              className="inline-flex min-h-[48px] items-center gap-2 rounded-full border border-black/20 px-6 text-[15px] font-semibold text-[#1d1d1f] transition hover:border-black/45"
             >
-              Download PDF ↓
+              Download PDF
+              <span aria-hidden="true">↓</span>
             </a>
           </div>
 
