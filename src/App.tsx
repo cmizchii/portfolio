@@ -1289,7 +1289,7 @@ function ProjectsSection() {
 
       <div className="h-[4vh]" aria-hidden="true" />
 
-      <div ref={aboutStageRef} className="relative h-[300vh] md:h-[400vh]">
+      <div ref={aboutStageRef} className="relative h-[300vh] md:h-[320vh]">
         <div className="sticky top-0 h-[100dvh] overflow-hidden md:h-screen">
           <AboutContent progress={aboutProgress} />
         </div>

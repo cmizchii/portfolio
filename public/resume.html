@@ -4,193 +4,222 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shaimaa Jamal Nur - Résumé</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#1d1d1f;
-    --muted:#6e6e73;
-    --light:#86868b;
-    --line:rgba(0,0,0,0.10);
-    --accent:#1EA8BA;
-    --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Hanken Grotesk",Inter,system-ui,sans-serif;
+    --ink:#1d1d1f; --muted:#6e6e73; --light:#86868b; --line:rgba(0,0,0,0.10);
+    --sf:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,system-ui,sans-serif;
+    --grotesk:'Familjen Grotesk',var(--sf);
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
-  body{font-family:var(--font);color:var(--ink);background:#ececed;line-height:1.45;}
-  .page{
-    max-width:780px;margin:22px auto;background:#fff;
-    padding:42px 48px 34px;
-    box-shadow:0 18px 60px rgba(0,0,0,0.10);
-  }
+  ::selection{background:#FF8862;color:#1d1d1f;}
+  body{font-family:var(--sf);color:var(--ink);background:#f3f2ef;line-height:1.5;}
+  .sheet{max-width:880px;margin:0 auto;background:#fff;box-shadow:0 30px 90px rgba(20,20,30,0.10);}
 
-  /* header */
-  header{border-bottom:1px solid var(--line);padding-bottom:17px;margin-bottom:19px;}
-  h1{font-size:29px;font-weight:700;letter-spacing:-0.025em;line-height:1;}
-  .role{margin-top:7px;font-size:14px;font-weight:600;color:var(--accent);letter-spacing:0.01em;}
-  .contact{margin-top:11px;font-size:11.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:5px 0;}
-  .contact span:not(:last-child)::after{content:"·";margin:0 9px;color:var(--light);}
-  .contact a{color:var(--muted);text-decoration:none;}
+  /* ===== dark hero (mirrors the site) ===== */
+  .hero{background:#0c0c0c;color:#fff;padding:26px 48px 52px;position:relative;overflow:hidden;}
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:46px;}
+  .mono{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:9px;
+    background:#fff;color:#0c0c0c;font-family:var(--grotesk);font-weight:700;font-size:18px;}
+  .bar-links{display:flex;align-items:center;gap:20px;font-size:13px;font-weight:600;}
+  .bar-links a{color:rgba(255,255,255,0.62);text-decoration:none;transition:color .2s;}
+  .bar-links a:hover{color:#fff;}
+  .bar-links a.dl{color:#0c0c0c;background:#fff;padding:8px 15px;border-radius:999px;}
+  .role-tag{display:inline-block;font-family:var(--grotesk);font-weight:700;font-size:12px;letter-spacing:.04em;
+    text-transform:uppercase;color:#241f2e;background:#FF8862;padding:6px 12px;border-radius:7px;margin-bottom:22px;}
+  h1{font-size:clamp(38px,6vw,58px);font-weight:700;letter-spacing:-0.03em;line-height:1;}
+  .contact{margin-top:18px;display:flex;flex-wrap:wrap;font-size:13.5px;color:rgba(255,255,255,0.66);}
+  .contact span:not(:last-child)::after{content:"·";margin:0 11px;color:rgba(255,255,255,0.3);}
+  .contact a{color:rgba(255,255,255,0.66);text-decoration:none;}
+  .contact a:hover{color:#fff;}
+  .summary{margin-top:26px;max-width:60ch;font-size:15px;line-height:1.65;color:rgba(255,255,255,0.78);}
 
-  .summary{font-size:12.5px;color:#3f3f44;line-height:1.55;margin-bottom:20px;}
+  /* ===== light body ===== */
+  main{padding:48px 48px 52px;}
+  section{margin-bottom:38px;}
+  .label{display:flex;align-items:center;gap:9px;font-family:var(--grotesk);font-size:11px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.18em;color:var(--light);margin-bottom:22px;}
+  .label::before{content:"";width:9px;height:9px;border-radius:3px;background:var(--dot,#FF8862);}
 
-  section{margin-bottom:18px;}
-  h2{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.16em;color:var(--light);
-     margin-bottom:11px;padding-bottom:6px;border-bottom:1px solid var(--line);}
-
-  .job{margin-bottom:13px;}
+  .job{margin-bottom:26px;}
   .job:last-child{margin-bottom:0;}
-  .job-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;}
-  .job-title{font-size:13.5px;font-weight:650;letter-spacing:-0.005em;}
-  .job-meta{font-size:11px;color:var(--light);white-space:nowrap;}
-  .job-org{font-size:12px;color:var(--accent);font-weight:600;margin-top:2px;}
-  ul{list-style:none;margin-top:6px;}
-  li{position:relative;padding-left:15px;font-size:12px;color:#48484d;line-height:1.5;margin-top:4px;}
-  li::before{content:"";position:absolute;left:0;top:8px;width:4px;height:4px;border-radius:50%;background:var(--accent);}
+  .job-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;}
+  .job-title{font-size:16px;font-weight:650;letter-spacing:-0.01em;}
+  .job-meta{font-size:12.5px;color:var(--light);white-space:nowrap;}
+  .job-org{font-size:13.5px;font-weight:600;margin-top:3px;color:var(--dot,#c0392b);}
+  ul{list-style:none;margin-top:12px;}
+  li{position:relative;padding-left:18px;font-size:14px;color:#48484d;line-height:1.55;margin-top:7px;}
+  li::before{content:"";position:absolute;left:0;top:9px;width:5px;height:5px;border-radius:50%;background:var(--dot,#FF8862);}
 
-  /* selected work */
-  .work-row{display:flex;justify-content:space-between;gap:14px;font-size:12px;padding:5px 0;border-bottom:1px dotted var(--line);}
+  .work-row{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);}
   .work-row:last-child{border-bottom:0;}
-  .work-name{font-weight:600;color:var(--ink);}
+  .work-name{font-size:14.5px;font-weight:600;}
   .work-name small{font-weight:400;color:var(--muted);}
-  .work-tag{font-size:10.5px;color:var(--light);white-space:nowrap;text-transform:uppercase;letter-spacing:0.06em;}
+  .work-tag{font-family:var(--grotesk);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+    color:#241f2e;padding:5px 11px;border-radius:999px;white-space:nowrap;}
 
-  /* two-up grid */
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
-  .edu-item{margin-bottom:10px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;}
+  .edu-item{margin-bottom:16px;}
   .edu-item:last-child{margin-bottom:0;}
-  .edu-title{font-size:12px;font-weight:600;}
-  .edu-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+  .edu-title{font-size:13.5px;font-weight:600;}
+  .edu-sub{font-size:12.5px;color:var(--muted);margin-top:2px;}
 
-  .skill-block{margin-bottom:10px;}
-  .skill-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink);margin-bottom:3px;}
-  .skill-list{font-size:11.5px;color:#55555b;line-height:1.5;}
+  .skill-group{margin-bottom:18px;}
+  .skill-group:last-child{margin-bottom:0;}
+  .skill-head{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);margin-bottom:10px;}
+  .tags{display:flex;flex-wrap:wrap;gap:7px;}
+  .tag{font-family:var(--grotesk);font-size:11.5px;font-weight:600;color:#241f2e;padding:5px 11px;border-radius:7px;line-height:1;}
+  /* rotating portfolio palette */
+  .tag:nth-child(8n+1){background:#FFB59A;}
+  .tag:nth-child(8n+2){background:#CDBBFF;}
+  .tag:nth-child(8n+3){background:#9CE9DC;}
+  .tag:nth-child(8n+4){background:#FBA8D2;}
+  .tag:nth-child(8n+5){background:#CBEDA0;}
+  .tag:nth-child(8n+6){background:#BFE0FF;}
+  .tag:nth-child(8n+7){background:#E3C2FF;}
+  .tag:nth-child(8n){background:#D9EE97;}
 
+  @media (max-width:680px){
+    .hero{padding:22px 26px 40px;}
+    main{padding:36px 26px 40px;}
+    .grid{grid-template-columns:1fr;gap:30px;}
+    .bar-links a.dl{display:none;}
+  }
   @media print{
     body{background:#fff;}
-    .page{box-shadow:none;margin:0;max-width:none;padding:14mm 15mm;}
-    @page{size:Letter;margin:0;}
-    a{color:var(--muted);}
+    .sheet{box-shadow:none;max-width:none;}
+    .hero{background:#fff;color:#000;padding:0 0 24px;}
+    .bar{display:none;}
+    .contact,.contact a,.summary{color:#333;}
+    .contact span::after{color:#999;}
   }
 </style>
 </head>
 <body>
-  <div class="page">
-    <header>
+  <div class="sheet">
+    <header class="hero">
+      <div class="bar">
+        <span class="mono">S</span>
+        <span class="bar-links">
+          <a href="/">← Back to portfolio</a>
+          <a class="dl" href="/Shaimaa_Jamal_Nur_Resume.pdf" download>Download PDF ↓</a>
+        </span>
+      </div>
+
+      <span class="role-tag">UX/UI Designer &amp; Front-End Developer</span>
       <h1>Shaimaa Jamal Nur</h1>
-      <div class="role">UX/UI Designer &amp; Front-End Developer</div>
       <div class="contact">
         <span>+1-940-238-6273</span>
         <span><a href="mailto:shimaa.j.nur@gmail.com">shimaa.j.nur@gmail.com</a></span>
         <span>UAE / Remote</span>
         <span><a href="https://shaimaajamal.com">shaimaajamal.com</a></span>
       </div>
+      <p class="summary">
+        UX/UI designer and front-end developer with 3 years of experience taking products from research and
+        wireframes through high-fidelity design to shipped, responsive code. I care about the small details that make
+        an interface feel right, I like owning work from start to finish, and I&rsquo;m always learning, most recently
+        about how AI can make everyday product flows a little smarter and faster.
+      </p>
     </header>
 
-    <p class="summary">
-      UX/UI designer and front-end developer with 3 years of experience taking products from research and
-      wireframes through high-fidelity design to shipped, responsive code. I care about the small details that make
-      an interface feel right, I like owning work from start to finish, and I&rsquo;m always learning, most recently
-      about how AI can make everyday product flows a little smarter and faster.
-    </p>
+    <main>
+      <section style="--dot:#FF8862">
+        <div class="label">Experience</div>
 
-    <section>
-      <h2>Experience</h2>
+        <div class="job">
+          <div class="job-head">
+            <div class="job-title">UX/UI Designer &amp; Front-End Developer</div>
+            <div class="job-meta">2024 &ndash; Present</div>
+          </div>
+          <div class="job-org">Cosmetics Growth &middot; Remote (US)</div>
+          <ul>
+            <li>Designed and built the company website from the ground up, covering UX strategy, brand visuals, responsive front-end, and deployment, which grew inbound client inquiries by about 40% within the first two months.</li>
+            <li>Redesigned conversion-focused marketing sites for 8+ cosmetics-brand clients, with clearer structure, stronger calls to action, and faster load times.</li>
+            <li>Ran up to 3 client projects at once within two-week windows as the sole point of contact, completing 12+ end-to-end projects across 4 countries without missing a deadline.</li>
+            <li>Added lightweight AI features such as in-product chat, UX helpers, and content generation using the Claude and OpenAI APIs.</li>
+          </ul>
+        </div>
 
-      <div class="job">
-        <div class="job-head">
-          <div class="job-title">UX/UI Designer &amp; Front-End Developer</div>
-          <div class="job-meta">2024 &ndash; Present</div>
+        <div class="job">
+          <div class="job-head">
+            <div class="job-title">Freelance UI/UX Designer &amp; Front-End Developer</div>
+            <div class="job-meta">2023 &ndash; 2024</div>
+          </div>
+          <div class="job-org">Independent &middot; Worldwide</div>
+          <ul>
+            <li>Designed and built 20+ digital products, including landing pages, SaaS dashboards, mobile-app interfaces, and e-commerce storefronts, for clients across the UAE, US, UK, and Europe.</li>
+            <li>Shipped production front-end (HTML, CSS, JavaScript, React) rather than stopping at design handoff, keeping the build true to the design.</li>
+            <li>Integrated AI capabilities into client products using the Claude and OpenAI APIs, including in-product chat, smart search, and generative content blocks.</li>
+            <li>Earned repeat business from around 70% of clients through reliable delivery and clear communication across 6+ time zones.</li>
+          </ul>
         </div>
-        <div class="job-org">Cosmetics Growth &middot; Remote (US)</div>
-        <ul>
-          <li>Designed and built the company website from the ground up, covering UX strategy, brand visuals, responsive front-end, and deployment, which grew inbound client inquiries by about 40% within the first two months.</li>
-          <li>Redesigned conversion-focused marketing sites for 8+ cosmetics-brand clients, with clearer structure, stronger calls to action, and faster load times.</li>
-          <li>Ran up to 3 client projects at once within two-week windows as the sole point of contact, completing 12+ end-to-end projects across 4 countries without missing a deadline.</li>
-          <li>Added lightweight AI features such as in-product chat, UX helpers, and content generation using the Claude and OpenAI APIs.</li>
-        </ul>
-      </div>
 
-      <div class="job">
-        <div class="job-head">
-          <div class="job-title">Freelance UI/UX Designer &amp; Front-End Developer</div>
-          <div class="job-meta">2023 &ndash; 2024</div>
-        </div>
-        <div class="job-org">Independent &middot; Worldwide</div>
-        <ul>
-          <li>Designed and built 20+ digital products, including landing pages, SaaS dashboards, mobile-app interfaces, and e-commerce storefronts, for clients across the UAE, US, UK, and Europe.</li>
-          <li>Shipped production front-end (HTML, CSS, JavaScript, React) rather than stopping at design handoff, keeping the build true to the design.</li>
-          <li>Integrated AI capabilities into client products using the Claude and OpenAI APIs, including in-product chat, smart search, and generative content blocks.</li>
-          <li>Earned repeat business from around 70% of clients through reliable delivery and clear communication across 6+ time zones.</li>
-        </ul>
-      </div>
-
-      <div class="job">
-        <div class="job-head">
-          <div class="job-title">Product &amp; Brand Designer</div>
-          <div class="job-meta">2022 &ndash; 2023</div>
-        </div>
-        <div class="job-org">Family-owned FMCG business &middot; Dubai, UAE</div>
-        <ul>
-          <li>Redesigned a powdered-milk brand&rsquo;s packaging from concept to print-ready files, working within real manufacturing and UAE labeling constraints, which supported stronger retail orders after launch.</li>
-          <li>Designed and built the company website from scratch and grew its monthly traffic, generating direct B2B inquiries from regional distributors.</li>
-          <li>Created a full brand system, including the logo, packaging, and marketing collateral, for one consistent identity across every sales channel.</li>
-        </ul>
-      </div>
-    </section>
-
-    <section>
-      <h2>Selected Work</h2>
-      <div class="work-row"><div class="work-name">Cosmetics Growth <small>&middot; conversion-focused marketing site, design + build</small></div><div class="work-tag">Client</div></div>
-      <div class="work-row"><div class="work-name">Who&rsquo;s Blank? <small>&middot; pass-and-play party game, design + prototype</small></div><div class="work-tag">Self-initiated</div></div>
-      <div class="work-row"><div class="work-name">Dani <small>&middot; wellness &amp; AI-companion app</small></div><div class="work-tag">Concept</div></div>
-      <div class="work-row"><div class="work-name">Pinterest <small>&middot; UX redesign (multi-save + ghost search)</small></div><div class="work-tag">Concept</div></div>
-      <div class="work-row"><div class="work-name">Personal portfolio <small>&middot; scroll-driven React site, design + build</small></div><div class="work-tag">Live</div></div>
-    </section>
-
-    <div class="grid">
-      <section>
-        <h2>Education &amp; Certifications</h2>
-        <div class="edu-item">
-          <div class="edu-title">Code in Place, Stanford University</div>
-          <div class="edu-sub">Selected from 80,000+ applicants &middot; 2023</div>
-        </div>
-        <div class="edu-item">
-          <div class="edu-title">CS50: Introduction to Computer Science</div>
-          <div class="edu-sub">HarvardX / edX &middot; 2023</div>
-        </div>
-        <div class="edu-item">
-          <div class="edu-title">Google UX Design Professional Certificate</div>
-          <div class="edu-sub">Google &middot; Coursera &middot; 2022&ndash;2023</div>
-        </div>
-        <div class="edu-item">
-          <div class="edu-title">Python for Data Science, AI &amp; Development</div>
-          <div class="edu-sub">IBM &middot; Coursera &middot; 2023</div>
-        </div>
-        <div class="edu-item">
-          <div class="edu-title">UI/UX &amp; Product Design Bootcamp</div>
-          <div class="edu-sub">Intensive design + product training &middot; 2022</div>
+        <div class="job">
+          <div class="job-head">
+            <div class="job-title">Product &amp; Brand Designer</div>
+            <div class="job-meta">2022 &ndash; 2023</div>
+          </div>
+          <div class="job-org">Family-owned FMCG business &middot; Dubai, UAE</div>
+          <ul>
+            <li>Redesigned a powdered-milk brand&rsquo;s packaging from concept to print-ready files, working within real manufacturing and UAE labeling constraints, which supported stronger retail orders after launch.</li>
+            <li>Designed and built the company website from scratch and grew its monthly traffic, generating direct B2B inquiries from regional distributors.</li>
+            <li>Created a full brand system, including the logo, packaging, and marketing collateral, for one consistent identity across every sales channel.</li>
+          </ul>
         </div>
       </section>
 
-      <section>
-        <h2>Skills</h2>
-        <div class="skill-block">
-          <div class="skill-label">Design</div>
-          <div class="skill-list">Figma · UI/UX · Interaction Design · Prototyping · Wireframing · Design Systems · User Research · Usability Testing · Responsive / Mobile-First · Visual Design · Brand Identity · Product Packaging</div>
-        </div>
-        <div class="skill-block">
-          <div class="skill-label">Development</div>
-          <div class="skill-list">HTML · CSS · JavaScript · TypeScript · React · Python · Git &amp; GitHub · REST APIs · Node.js &amp; Firebase (basics) · VS Code · Command Line</div>
-        </div>
-        <div class="skill-block">
-          <div class="skill-label">AI &amp; Tools</div>
-          <div class="skill-list">Claude API · OpenAI API · AI feature integration · AI-assisted UX flows · Prompt engineering · GitHub Copilot · Framer</div>
-        </div>
-        <div class="skill-block">
-          <div class="skill-label">Languages</div>
-          <div class="skill-list">English (professional) · Arabic (professional) · Somali (native)</div>
-        </div>
+      <section style="--dot:#B488FF">
+        <div class="label">Selected Work</div>
+        <div class="work-row"><div class="work-name">Cosmetics Growth <small>· conversion-focused marketing site, design + build</small></div><span class="work-tag" style="background:#9CE9DC">Client</span></div>
+        <div class="work-row"><div class="work-name">Who&rsquo;s Blank? <small>· pass-and-play party game, design + prototype</small></div><span class="work-tag" style="background:#CDBBFF">Self-initiated</span></div>
+        <div class="work-row"><div class="work-name">Dani <small>· wellness &amp; AI-companion app</small></div><span class="work-tag" style="background:#FBA8D2">Concept</span></div>
+        <div class="work-row"><div class="work-name">Pinterest <small>· UX redesign (multi-save + ghost search)</small></div><span class="work-tag" style="background:#FBA8D2">Concept</span></div>
+        <div class="work-row"><div class="work-name">Personal portfolio <small>· scroll-driven React site, design + build</small></div><span class="work-tag" style="background:#CBEDA0">Live</span></div>
       </section>
-    </div>
+
+      <div class="grid">
+        <section style="--dot:#5DDDC8">
+          <div class="label">Education &amp; Certifications</div>
+          <div class="edu-item"><div class="edu-title">Code in Place, Stanford University</div><div class="edu-sub">Selected from 80,000+ applicants · 2023</div></div>
+          <div class="edu-item"><div class="edu-title">CS50: Introduction to Computer Science</div><div class="edu-sub">HarvardX / edX · 2023</div></div>
+          <div class="edu-item"><div class="edu-title">Google UX Design Professional Certificate</div><div class="edu-sub">Google · Coursera · 2022&ndash;2023</div></div>
+          <div class="edu-item"><div class="edu-title">Python for Data Science, AI &amp; Development</div><div class="edu-sub">IBM · Coursera · 2023</div></div>
+          <div class="edu-item"><div class="edu-title">UI/UX &amp; Product Design Bootcamp</div><div class="edu-sub">Intensive design + product training · 2022</div></div>
+        </section>
+
+        <section style="--dot:#EE6FAF">
+          <div class="label">Skills</div>
+          <div class="skill-group">
+            <div class="skill-head">Design</div>
+            <div class="tags">
+              <span class="tag">Figma</span><span class="tag">UI/UX</span><span class="tag">Interaction Design</span><span class="tag">Prototyping</span><span class="tag">Wireframing</span><span class="tag">Design Systems</span><span class="tag">User Research</span><span class="tag">Usability Testing</span><span class="tag">Responsive</span><span class="tag">Visual Design</span><span class="tag">Brand Identity</span><span class="tag">Packaging</span>
+            </div>
+          </div>
+          <div class="skill-group">
+            <div class="skill-head">Development</div>
+            <div class="tags">
+              <span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span><span class="tag">TypeScript</span><span class="tag">React</span><span class="tag">Python</span><span class="tag">Git &amp; GitHub</span><span class="tag">REST APIs</span><span class="tag">Node.js</span><span class="tag">Firebase</span><span class="tag">VS Code</span>
+            </div>
+          </div>
+          <div class="skill-group">
+            <div class="skill-head">AI &amp; Tools</div>
+            <div class="tags">
+              <span class="tag">Claude API</span><span class="tag">OpenAI API</span><span class="tag">AI feature integration</span><span class="tag">AI-assisted UX</span><span class="tag">Prompt engineering</span><span class="tag">GitHub Copilot</span><span class="tag">Framer</span>
+            </div>
+          </div>
+          <div class="skill-group">
+            <div class="skill-head">Languages</div>
+            <div class="tags">
+              <span class="tag">English (professional)</span><span class="tag">Arabic (professional)</span><span class="tag">Somali (native)</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
   </div>
 </body>
 </html>
